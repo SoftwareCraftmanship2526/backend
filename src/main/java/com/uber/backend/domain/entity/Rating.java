@@ -1,0 +1,35 @@
+package com.uber.backend.domain.entity;
+
+import com.uber.backend.domain.enums.RatingSource;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "ratings")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class Rating {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private Integer stars;
+
+    @Column(length = 1000)
+    private String comment;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rated_by", nullable = false)
+    private RatingSource ratedBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ride_id", nullable = false)
+    private Ride ride;
+}
