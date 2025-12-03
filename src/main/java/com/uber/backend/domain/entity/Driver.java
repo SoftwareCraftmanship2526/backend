@@ -10,8 +10,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "drivers")
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder

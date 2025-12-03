@@ -9,8 +9,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "passengers")
-@Data
-@EqualsAndHashCode(callSuper = true)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
