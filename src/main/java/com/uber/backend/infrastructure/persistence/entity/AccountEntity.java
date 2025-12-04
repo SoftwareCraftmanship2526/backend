@@ -1,11 +1,7 @@
-package com.uber.backend.domain.entity;
+package com.uber.backend.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -16,17 +12,16 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
-public abstract class Account {
+public abstract class AccountEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(nullable = false)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
     @Column(nullable = false, unique = true)
@@ -35,14 +30,16 @@ public abstract class Account {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
+        if (this.createdAt == null) {
+            this.createdAt = LocalDateTime.now();
+        }
     }
 }

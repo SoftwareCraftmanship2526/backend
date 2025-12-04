@@ -1,4 +1,4 @@
-package com.uber.backend.domain.entity;
+package com.uber.backend.infrastructure.persistence.entity;
 
 import com.uber.backend.domain.embeddable.Location;
 import com.uber.backend.domain.enums.RideStatus;
@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Ride {
+public class RideEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +27,7 @@ public class Ride {
     @Column(nullable = false)
     private RideStatus status;
 
-    @Column(name = "requested_at", nullable = false, updatable = false)
+    @Column(name = "requested_at", nullable = false)
     private LocalDateTime requestedAt;
 
     @Column(name = "started_at")
@@ -41,44 +41,46 @@ public class Ride {
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "latitude", column = @Column(name = "pickup_latitude")),
-        @AttributeOverride(name = "longitude", column = @Column(name = "pickup_longitude")),
-        @AttributeOverride(name = "address", column = @Column(name = "pickup_address"))
+            @AttributeOverride(name = "latitude", column = @Column(name = "pickup_latitude")),
+            @AttributeOverride(name = "longitude", column = @Column(name = "pickup_longitude")),
+            @AttributeOverride(name = "address", column = @Column(name = "pickup_address"))
     })
     private Location pickupLocation;
 
     @Embedded
     @AttributeOverrides({
-        @AttributeOverride(name = "latitude", column = @Column(name = "dropoff_latitude")),
-        @AttributeOverride(name = "longitude", column = @Column(name = "dropoff_longitude")),
-        @AttributeOverride(name = "address", column = @Column(name = "dropoff_address"))
+            @AttributeOverride(name = "latitude", column = @Column(name = "dropoff_latitude")),
+            @AttributeOverride(name = "longitude", column = @Column(name = "dropoff_longitude")),
+            @AttributeOverride(name = "address", column = @Column(name = "dropoff_address"))
     })
     private Location dropoffLocation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "passenger_id", nullable = false)
-    private Passenger passenger;
+    private PassengerEntity passenger;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "driver_id")
-    private Driver driver;
+    private DriverEntity driver;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "vehicle_id")
-    private Vehicle vehicle;
+    private VehicleEntity vehicle;
 
     @OneToOne(mappedBy = "ride", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Payment payment;
+    private PaymentEntity payment;
 
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Rating> ratings = new ArrayList<>();
+    private List<RatingEntity> ratings = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
-        requestedAt = LocalDateTime.now();
-        if (status == null) {
-            status = RideStatus.REQUESTED;
+        if (this.requestedAt == null) {
+            this.requestedAt = LocalDateTime.now();
+        }
+        if (this.status == null) {
+            this.status = RideStatus.REQUESTED;
         }
     }
 }

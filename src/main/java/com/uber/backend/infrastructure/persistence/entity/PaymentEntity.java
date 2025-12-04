@@ -1,4 +1,4 @@
-package com.uber.backend.domain.entity;
+package com.uber.backend.infrastructure.persistence.entity;
 
 import com.uber.backend.domain.enums.PaymentMethod;
 import com.uber.backend.domain.enums.PaymentStatus;
@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Payment {
+public class PaymentEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,7 +36,7 @@ public class Payment {
 
     @OneToOne
     @JoinColumn(name = "ride_id", nullable = false)
-    private Ride ride;
+    private RideEntity ride;
 
     @PrePersist
     protected void onCreate() {

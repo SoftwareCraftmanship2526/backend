@@ -5,9 +5,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-/**
- * Pricing strategy for UberX rides - standard affordable option.
- */
 @Component
 public class UberXStrategy implements PricingStrategy {
 

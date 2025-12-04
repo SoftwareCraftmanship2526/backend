@@ -5,9 +5,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-/**
- * Pricing strategy for UberBlack rides - premium luxury option.
- */
 @Component
 public class UberBlackStrategy implements PricingStrategy {
 

@@ -1,8 +1,7 @@
-package com.uber.backend.domain.entity;
+package com.uber.backend.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +12,13 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
-public class Passenger extends Account {
+@Builder
+public class PassengerEntity extends AccountEntity {
 
     @Column(name = "passenger_rating")
     private Double passengerRating;
 
-    @ElementCollection
+    @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(name = "passenger_saved_addresses", joinColumns = @JoinColumn(name = "passenger_id"))
     @Column(name = "address")
     @Builder.Default
@@ -27,5 +26,5 @@ public class Passenger extends Account {
 
     @OneToMany(mappedBy = "passenger", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Ride> rides = new ArrayList<>();
+    private List<RideEntity> rides = new ArrayList<>();
 }
