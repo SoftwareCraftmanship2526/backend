@@ -1,7 +1,6 @@
 package com.uber.backend.rating.infrastructure.persistence;
 
 import com.uber.backend.rating.domain.model.Rating;
-import com.uber.backend.rating.infrastructure.persistence.RatingEntity;
 import org.springframework.stereotype.Component;
 
 @Component

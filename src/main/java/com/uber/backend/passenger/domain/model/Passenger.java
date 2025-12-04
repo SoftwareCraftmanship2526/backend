@@ -20,25 +20,5 @@ public class Passenger extends Account {
     private List<String> savedAddresses = new ArrayList<>();
 
     @Builder.Default
-    private List<Long> rideIds = new ArrayList<>();  // Reference by ID instead of entity
-
-    public void addSavedAddress(String address) {
-        if (address != null && !address.isBlank() && !savedAddresses.contains(address)) {
-            savedAddresses.add(address);
-        }
-    }
-
-    public void removeSavedAddress(String address) {
-        savedAddresses.remove(address);
-    }
-
-    public boolean hasGoodRating() {
-        return passengerRating != null && passengerRating >= 4.0;
-    }
-
-    public void updateRating(double newRating) {
-        if (newRating >= 0 && newRating <= 5.0) {
-            this.passengerRating = newRating;
-        }
-    }
+    private List<Long> rideIds = new ArrayList<>();
 }

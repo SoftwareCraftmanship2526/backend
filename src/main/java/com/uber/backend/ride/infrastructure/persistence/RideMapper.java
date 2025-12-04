@@ -2,7 +2,6 @@ package com.uber.backend.ride.infrastructure.persistence;
 
 import com.uber.backend.ride.domain.model.Ride;
 import com.uber.backend.rating.infrastructure.persistence.RatingEntity;
-import com.uber.backend.ride.infrastructure.persistence.RideEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
