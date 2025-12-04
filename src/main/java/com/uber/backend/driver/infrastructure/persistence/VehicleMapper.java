@@ -2,7 +2,6 @@ package com.uber.backend.driver.infrastructure.persistence;
 
 import com.uber.backend.driver.domain.model.Vehicle;
 import com.uber.backend.ride.infrastructure.persistence.RideEntity;
-import com.uber.backend.driver.infrastructure.persistence.VehicleEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;

@@ -129,11 +129,7 @@ public class DataSeederService {
         driver1.setDriverRating(4.9);
         driver1.setIsAvailable(true);
         driver1.setLicenseNumber("DL-NY-123456");
-        driver1.setCurrentLocation(Location.builder()
-                .latitude(40.7128)
-                .longitude(-74.0060)
-                .address("Times Square, New York, NY")
-                .build());
+        driver1.setCurrentLocation(new Location(40.7128, -74.0060, "Times Square, New York, NY"));
 
         DriverEntity driver2 = new DriverEntity();
         driver2.setFirstName("Emily");
@@ -144,11 +140,7 @@ public class DataSeederService {
         driver2.setDriverRating(4.95);
         driver2.setIsAvailable(true);
         driver2.setLicenseNumber("DL-NY-789012");
-        driver2.setCurrentLocation(Location.builder()
-                .latitude(40.7589)
-                .longitude(-73.9851)
-                .address("Central Park, New York, NY")
-                .build());
+        driver2.setCurrentLocation(new Location(40.7589, -73.9851, "Central Park, New York, NY"));
 
         DriverEntity driver3 = new DriverEntity();
         driver3.setFirstName("James");
@@ -159,11 +151,7 @@ public class DataSeederService {
         driver3.setDriverRating(4.7);
         driver3.setIsAvailable(false);
         driver3.setLicenseNumber("DL-NY-345678");
-        driver3.setCurrentLocation(Location.builder()
-                .latitude(40.7580)
-                .longitude(-73.9855)
-                .address("Columbus Circle, New York, NY")
-                .build());
+        driver3.setCurrentLocation(new Location(40.7580, -73.9855, "Columbus Circle, New York, NY"));
 
         return driverRepository.saveAll(Arrays.asList(driver1, driver2, driver3));
     }
@@ -201,16 +189,8 @@ public class DataSeederService {
         ride1.setStartedAt(LocalDateTime.now().minusDays(2).plusMinutes(5));
         ride1.setCompletedAt(LocalDateTime.now().minusDays(2).plusMinutes(25));
         ride1.setFareAmount(new BigDecimal("18.50"));
-        ride1.setPickupLocation(Location.builder()
-                .latitude(40.7128)
-                .longitude(-74.0060)
-                .address("123 Oak Street, New York, NY 10001")
-                .build());
-        ride1.setDropoffLocation(Location.builder()
-                .latitude(40.7589)
-                .longitude(-73.9851)
-                .address("456 Corporate Plaza, New York, NY 10005")
-                .build());
+        ride1.setPickupLocation(new Location(40.7128, -74.0060, "123 Oak Street, New York, NY 10001"));
+        ride1.setDropoffLocation(new Location(40.7589, -73.9851, "456 Corporate Plaza, New York, NY 10005"));
         ride1.setPassenger(passengers.get(0));
         ride1.setDriver(drivers.get(0));
         ride1.setVehicle(vehicles.get(0));
@@ -221,16 +201,8 @@ public class DataSeederService {
         ride2.setRequestedAt(LocalDateTime.now().minusMinutes(15));
         ride2.setStartedAt(LocalDateTime.now().minusMinutes(10));
         ride2.setFareAmount(new BigDecimal("35.00"));
-        ride2.setPickupLocation(Location.builder()
-                .latitude(40.7589)
-                .longitude(-73.9851)
-                .address("789 Elm Avenue, Brooklyn, NY 11201")
-                .build());
-        ride2.setDropoffLocation(Location.builder()
-                .latitude(40.7580)
-                .longitude(-73.9855)
-                .address("JFK Airport, Queens, NY")
-                .build());
+        ride2.setPickupLocation(new Location(40.7589, -73.9851, "789 Elm Avenue, Brooklyn, NY 11201"));
+        ride2.setDropoffLocation(new Location(40.7580, -73.9855, "JFK Airport, Queens, NY"));
         ride2.setPassenger(passengers.get(1));
         ride2.setDriver(drivers.get(1));
         ride2.setVehicle(vehicles.get(1));
@@ -239,16 +211,8 @@ public class DataSeederService {
         RideEntity ride3 = new RideEntity();
         ride3.setStatus(RideStatus.REQUESTED);
         ride3.setRequestedAt(LocalDateTime.now().minusMinutes(2));
-        ride3.setPickupLocation(Location.builder()
-                .latitude(40.7580)
-                .longitude(-73.9855)
-                .address("321 Pine Road, Queens, NY 11354")
-                .build());
-        ride3.setDropoffLocation(Location.builder()
-                .latitude(40.7128)
-                .longitude(-74.0060)
-                .address("555 Fitness Street, Queens, NY 11355")
-                .build());
+        ride3.setPickupLocation(new Location(40.7580, -73.9855, "321 Pine Road, Queens, NY 11354"));
+        ride3.setDropoffLocation(new Location(40.7128, -74.0060, "555 Fitness Street, Queens, NY 11355"));
         ride3.setPassenger(passengers.get(2));
 
         // Completed Ride 4
@@ -258,16 +222,8 @@ public class DataSeederService {
         ride4.setStartedAt(LocalDateTime.now().minusDays(5).plusMinutes(3));
         ride4.setCompletedAt(LocalDateTime.now().minusDays(5).plusMinutes(18));
         ride4.setFareAmount(new BigDecimal("22.75"));
-        ride4.setPickupLocation(Location.builder()
-                .latitude(40.7128)
-                .longitude(-74.0060)
-                .address("Central Park West, New York, NY")
-                .build());
-        ride4.setDropoffLocation(Location.builder()
-                .latitude(40.7589)
-                .longitude(-73.9851)
-                .address("Brooklyn Bridge, Brooklyn, NY")
-                .build());
+        ride4.setPickupLocation(new Location(40.7128, -74.0060, "Central Park West, New York, NY"));
+        ride4.setDropoffLocation(new Location(40.7589, -73.9851, "Brooklyn Bridge, Brooklyn, NY"));
         ride4.setPassenger(passengers.get(0));
         ride4.setDriver(drivers.get(1));
         ride4.setVehicle(vehicles.get(1));
