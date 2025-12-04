@@ -1,6 +1,6 @@
-package com.uber.backend.controller;
+package com.uber.backend.api.web;
 
-import com.uber.backend.service.DataSeederService;
+import com.uber.backend.infrastructure.seed.DataSeederService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,14 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * REST Controller for manually triggering database seeding operations.
- *
- * Endpoints:
- * - POST /api/seed/reset - Delete all data and reseed the database
- * - POST /api/seed/data - Seed the database (without deleting existing data)
- * - DELETE /api/seed/data - Delete all data from the database
- */
 @RestController
 @RequestMapping("/api/seed")
 @RequiredArgsConstructor
@@ -23,12 +15,6 @@ public class DataSeederController {
 
     private final DataSeederService dataSeederService;
 
-    /**
-     * Reset and reseed the entire database.
-     * DELETE all existing data first, then INSERT seed data.
-     *
-     * Usage: POST http://localhost:8080/api/seed/reset
-     */
     @PostMapping("/reset")
     public ResponseEntity<Map<String, String>> resetDatabase() {
         dataSeederService.deleteAllData();
@@ -41,11 +27,6 @@ public class DataSeederController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Seed the database with sample data (without deleting existing data).
-     *
-     * Usage: POST http://localhost:8080/api/seed/data
-     */
     @PostMapping("/data")
     public ResponseEntity<Map<String, String>> seedDatabase() {
         dataSeederService.seedDatabase();
@@ -57,11 +38,6 @@ public class DataSeederController {
         return ResponseEntity.ok(response);
     }
 
-    /**
-     * Delete all data from the database.
-     *
-     * Usage: DELETE http://localhost:8080/api/seed/data
-     */
     @DeleteMapping("/data")
     public ResponseEntity<Map<String, String>> deleteAllData() {
         dataSeederService.deleteAllData();

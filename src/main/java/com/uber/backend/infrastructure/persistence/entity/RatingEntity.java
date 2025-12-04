@@ -1,4 +1,4 @@
-package com.uber.backend.domain.entity;
+package com.uber.backend.infrastructure.persistence.entity;
 
 import com.uber.backend.domain.enums.RatingSource;
 import jakarta.persistence.*;
@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Rating {
+public class RatingEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,5 +29,5 @@ public class Rating {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ride_id", nullable = false)
-    private Ride ride;
+    private RideEntity ride;
 }

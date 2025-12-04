@@ -1,4 +1,4 @@
-package com.uber.backend.domain.entity;
+package com.uber.backend.infrastructure.persistence.entity;
 
 import com.uber.backend.domain.enums.RideType;
 import jakarta.persistence.*;
@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Vehicle {
+public class VehicleEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,9 +35,9 @@ public class Vehicle {
 
     @OneToOne
     @JoinColumn(name = "driver_id")
-    private Driver driver;
+    private DriverEntity driver;
 
     @OneToMany(mappedBy = "vehicle", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private List<Ride> rides = new ArrayList<>();
+    private List<RideEntity> rides = new ArrayList<>();
 }
