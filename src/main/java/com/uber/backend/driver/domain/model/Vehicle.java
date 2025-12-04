@@ -18,27 +18,8 @@ public class Vehicle {
     private String model;
     private String color;
     private RideType type;
-    private Long driverId;  // Reference by ID
+    private Long driverId;
 
     @Builder.Default
-    private List<Long> rideIds = new ArrayList<>();  // Reference by ID
-
-    public boolean hasValidLicensePlate() {
-        return licensePlate != null && !licensePlate.isBlank();
-    }
-
-    public boolean isValid() {
-        return hasValidLicensePlate()
-                && model != null && !model.isBlank()
-                && color != null && !color.isBlank()
-                && type != null;
-    }
-
-    public boolean hasDriver() {
-        return driverId != null;
-    }
-
-    public String getDescription() {
-        return color + " " + model + " (" + licensePlate + ")";
-    }
+    private List<Long> rideIds = new ArrayList<>();
 }
