@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-@Component
+@Component("UberX")
 public class UberXStrategy implements PricingStrategy {
 
     private static final BigDecimal BASE_FARE = new BigDecimal("2.50");

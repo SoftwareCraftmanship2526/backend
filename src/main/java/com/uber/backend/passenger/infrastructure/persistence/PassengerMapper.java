@@ -1,7 +1,6 @@
 package com.uber.backend.passenger.infrastructure.persistence;
 
 import com.uber.backend.passenger.domain.model.Passenger;
-import com.uber.backend.passenger.infrastructure.persistence.PassengerEntity;
 import com.uber.backend.ride.infrastructure.persistence.RideEntity;
 import org.springframework.stereotype.Component;
 
