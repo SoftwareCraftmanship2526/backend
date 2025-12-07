@@ -2,6 +2,7 @@ package com.uber.backend.ride.api;
 
 import com.uber.backend.ride.application.RideService;
 import com.uber.backend.ride.dto.RidePriceRequestDto;
+import com.uber.backend.ride.dto.PriceEstimateDto;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -17,8 +18,15 @@ public class RideController {
     }
 
     @PostMapping("/price")
-    public BigDecimal getPrice(@RequestBody RidePriceRequestDto ridePriceRequestDto) {
-        return rideService.calculatePrice(ridePriceRequestDto.getType(), ridePriceRequestDto.getDistanceKm(), ridePriceRequestDto.getDurationMin(), ridePriceRequestDto.getDemandMultiplier());
+    public BigDecimal estimatePrice(@RequestBody RidePriceRequestDto request) {
+
+        return rideService.calculatePrice(
+                request.getType(),
+                request.getStart(),
+                request.getEnd(),
+                request.getDurationMin(),
+                request.getDemandMultiplier()
+        );
     }
 
 }

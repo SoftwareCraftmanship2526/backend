@@ -1,29 +1,34 @@
 package com.uber.backend.ride.application;
 
-import com.uber.backend.ride.domain.strategy.PricingStrategy;
-import com.uber.backend.ride.infrastructure.persistence.RideEntity;
+import com.uber.backend.ride.domain.port.DistanceCalculatorPort;
+import com.uber.backend.ride.domain.strategy.PricingContext;
 import com.uber.backend.ride.infrastructure.repository.RideRepository;
+import com.uber.backend.shared.domain.valueobject.Location;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 @Service
 public class RideService {
 
-    private final RideRepository rideRepository;
-    private final Map<String, PricingStrategy> pricingStrategies;
+    private final PricingContext pricingContext;
+    private final DistanceCalculatorPort distanceCalculator;
 
-    public RideService(RideRepository rideRepository, Map<String, PricingStrategy> pricingStrategies) {
-        this.rideRepository = rideRepository;
-        this.pricingStrategies = pricingStrategies;
+    public RideService(RideRepository rideRepository,
+                       PricingContext pricingContext,
+                       DistanceCalculatorPort distanceCalculator) {
+        this.pricingContext = pricingContext;
+        this.distanceCalculator = distanceCalculator;
     }
 
-    public BigDecimal calculatePrice(String type, double distanceKm, int durationMin, double demandMultiplier) {
-        PricingStrategy strategy = pricingStrategies.get(type);
-        if (strategy == null) {
-            throw new IllegalArgumentException(String.format("Invalid type %s", type));
-        }
-        return strategy.calculateFare(distanceKm, durationMin, demandMultiplier);
+    public BigDecimal calculatePrice(String type,
+                                     Location start,
+                                     Location end,
+                                     int durationMin,
+                                     double demandMultiplier) {
+
+        double distanceKm = distanceCalculator.calculateDistance(start, end);
+
+        return pricingContext.calculateFare(type, distanceKm, durationMin, demandMultiplier);
     }
 }
