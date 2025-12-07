@@ -26,10 +26,12 @@ CREATE TABLE accounts (
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     phone_number VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL CHECK (role IN ('PASSENGER', 'DRIVER', 'ADMIN')),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE INDEX idx_accounts_email ON accounts(email);
+CREATE INDEX idx_accounts_role ON accounts(role);
 
 -- Passenger table (extends Account)
 CREATE TABLE passengers (

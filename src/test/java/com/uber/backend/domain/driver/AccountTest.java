@@ -1,5 +1,6 @@
 package com.uber.backend.domain.driver;
 
+import com.uber.backend.auth.domain.enums.Role;
 import com.uber.backend.driver.domain.model.Account;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -37,6 +38,7 @@ class AccountTest {
                 .email("john.doe@example.com")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.DRIVER)
                 .build();
 
         // When
@@ -55,6 +57,7 @@ class AccountTest {
                 .email("invalid-email")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.DRIVER)
                 .build();
 
         // When
@@ -74,6 +77,7 @@ class AccountTest {
                 .email("john@example.com")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.DRIVER)
                 .build();
 
         // When
@@ -92,6 +96,7 @@ class AccountTest {
                 .email("john@example.com")
                 .password("password123")
                 .phoneNumber("123")
+                .role(Role.DRIVER)
                 .build();
 
         // When
@@ -111,6 +116,7 @@ class AccountTest {
                 .email("john@example.com")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.DRIVER)
                 .build();
 
         // When
@@ -129,6 +135,7 @@ class AccountTest {
                 .email("john@example.com")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.DRIVER)
                 .build();
 
         // When

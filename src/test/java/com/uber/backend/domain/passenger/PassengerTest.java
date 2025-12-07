@@ -1,5 +1,6 @@
 package com.uber.backend.domain.passenger;
 
+import com.uber.backend.auth.domain.enums.Role;
 import com.uber.backend.passenger.domain.model.Passenger;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -33,6 +34,7 @@ class PassengerTest {
                 .email("jane@example.com")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.PASSENGER)
                 .passengerRating(4.8)
                 .build();
 
@@ -52,6 +54,7 @@ class PassengerTest {
                 .email("jane@example.com")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.PASSENGER)
                 .passengerRating(5.5)
                 .build();
 

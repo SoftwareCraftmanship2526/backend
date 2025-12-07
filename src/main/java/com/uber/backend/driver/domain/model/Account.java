@@ -1,7 +1,9 @@
 package com.uber.backend.driver.domain.model;
 
+import com.uber.backend.auth.domain.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -40,6 +42,9 @@ public abstract class Account {
     @NotBlank(message = "Phone number is required")
     @Pattern(regexp = "^\\+?[0-9]{10,15}$", message = "Phone number must be 10-15 digits")
     private String phoneNumber;
+
+    @NotNull(message = "Role is required")
+    private Role role;
 
     private LocalDateTime createdAt;
 }

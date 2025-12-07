@@ -1,5 +1,6 @@
 package com.uber.backend.domain.driver;
 
+import com.uber.backend.auth.domain.enums.Role;
 import com.uber.backend.driver.domain.model.Driver;
 import com.uber.backend.shared.domain.valueobject.Location;
 import jakarta.validation.ConstraintViolation;
@@ -33,6 +34,7 @@ class DriverTest {
                 .email("john@example.com")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.DRIVER)
                 .driverRating(4.5)
                 .licenseNumber("DL123456")
                 .isAvailable(true)
@@ -54,6 +56,7 @@ class DriverTest {
                 .email("john@example.com")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.DRIVER)
                 .driverRating(6.0)
                 .licenseNumber("DL123456")
                 .isAvailable(true)
@@ -76,6 +79,7 @@ class DriverTest {
                 .email("john@example.com")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.DRIVER)
                 .licenseNumber("DL123456")
                 .driverRating(4.5)
                 .isAvailable(true)
@@ -97,6 +101,7 @@ class DriverTest {
                 .email("john@example.com")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.DRIVER)
                 .licenseNumber("")
                 .driverRating(4.5)
                 .isAvailable(true)
@@ -120,6 +125,7 @@ class DriverTest {
                 .email("john@example.com")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.DRIVER)
                 .currentLocation(location)
                 .licenseNumber("DL123456")
                 .isAvailable(true)
@@ -142,6 +148,7 @@ class DriverTest {
                 .email("john@example.com")
                 .password("password123")
                 .phoneNumber("+32471234567")
+                .role(Role.DRIVER)
                 .currentLocation(location)
                 .licenseNumber("DL123456")
                 .isAvailable(true)

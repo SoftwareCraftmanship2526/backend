@@ -1,5 +1,6 @@
 package com.uber.backend.driver.infrastructure.persistence;
 
+import com.uber.backend.auth.domain.enums.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,6 +33,10 @@ public abstract class AccountEntity {
 
     @Column(name = "phone_number", nullable = false)
     private String phoneNumber;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Role role;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
