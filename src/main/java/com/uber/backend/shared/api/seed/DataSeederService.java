@@ -1,5 +1,6 @@
 package com.uber.backend.shared.api.seed;
 
+import com.uber.backend.auth.domain.enums.Role;
 import com.uber.backend.shared.domain.valueobject.Location;
 import com.uber.backend.ride.domain.enums.*;
 import com.uber.backend.payment.domain.enums.*;
@@ -16,6 +17,7 @@ import com.uber.backend.passenger.infrastructure.repository.*;
 import com.uber.backend.rating.infrastructure.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,7 @@ public class DataSeederService {
     private final RideRepository rideRepository;
     private final PaymentRepository paymentRepository;
     private final RatingRepository ratingRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public void deleteAllData() {
@@ -81,12 +84,15 @@ public class DataSeederService {
     }
 
     private List<PassengerEntity> createPassengers() {
+        String encodedPassword = passwordEncoder.encode("Password123");
+
         PassengerEntity passenger1 = new PassengerEntity();
         passenger1.setFirstName("John");
         passenger1.setLastName("Doe");
         passenger1.setEmail("john.passenger@example.com");
-        passenger1.setPassword("$2a$10$dummyHashedPassword1");
+        passenger1.setPassword(encodedPassword);
         passenger1.setPhoneNumber("+1-555-0101");
+        passenger1.setRole(Role.PASSENGER);
         passenger1.setPassengerRating(4.8);
         passenger1.setSavedAddresses(Arrays.asList(
                 "Home: 123 Oak Street, New York, NY 10001",
@@ -97,8 +103,9 @@ public class DataSeederService {
         passenger2.setFirstName("Sarah");
         passenger2.setLastName("Johnson");
         passenger2.setEmail("sarah.passenger@example.com");
-        passenger2.setPassword("$2a$10$dummyHashedPassword2");
+        passenger2.setPassword(encodedPassword);
         passenger2.setPhoneNumber("+1-555-0102");
+        passenger2.setRole(Role.PASSENGER);
         passenger2.setPassengerRating(4.9);
         passenger2.setSavedAddresses(Arrays.asList(
                 "Home: 789 Elm Avenue, Brooklyn, NY 11201"
@@ -108,8 +115,9 @@ public class DataSeederService {
         passenger3.setFirstName("Michael");
         passenger3.setLastName("Chen");
         passenger3.setEmail("michael.passenger@example.com");
-        passenger3.setPassword("$2a$10$dummyHashedPassword3");
+        passenger3.setPassword(encodedPassword);
         passenger3.setPhoneNumber("+1-555-0103");
+        passenger3.setRole(Role.PASSENGER);
         passenger3.setPassengerRating(4.6);
         passenger3.setSavedAddresses(Arrays.asList(
                 "Home: 321 Pine Road, Queens, NY 11354",
@@ -120,12 +128,15 @@ public class DataSeederService {
     }
 
     private List<DriverEntity> createDrivers() {
+        String encodedPassword = passwordEncoder.encode("Password123");
+
         DriverEntity driver1 = new DriverEntity();
         driver1.setFirstName("Robert");
         driver1.setLastName("Smith");
         driver1.setEmail("robert.driver@example.com");
-        driver1.setPassword("$2a$10$dummyHashedPassword4");
+        driver1.setPassword(encodedPassword);
         driver1.setPhoneNumber("+1-555-0201");
+        driver1.setRole(Role.DRIVER);
         driver1.setDriverRating(4.9);
         driver1.setIsAvailable(true);
         driver1.setLicenseNumber("DL-NY-123456");
@@ -135,8 +146,9 @@ public class DataSeederService {
         driver2.setFirstName("Emily");
         driver2.setLastName("Davis");
         driver2.setEmail("emily.driver@example.com");
-        driver2.setPassword("$2a$10$dummyHashedPassword5");
+        driver2.setPassword(encodedPassword);
         driver2.setPhoneNumber("+1-555-0202");
+        driver2.setRole(Role.DRIVER);
         driver2.setDriverRating(4.95);
         driver2.setIsAvailable(true);
         driver2.setLicenseNumber("DL-NY-789012");
@@ -146,8 +158,9 @@ public class DataSeederService {
         driver3.setFirstName("James");
         driver3.setLastName("Wilson");
         driver3.setEmail("james.driver@example.com");
-        driver3.setPassword("$2a$10$dummyHashedPassword6");
+        driver3.setPassword(encodedPassword);
         driver3.setPhoneNumber("+1-555-0203");
+        driver3.setRole(Role.DRIVER);
         driver3.setDriverRating(4.7);
         driver3.setIsAvailable(false);
         driver3.setLicenseNumber("DL-NY-345678");
