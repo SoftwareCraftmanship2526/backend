@@ -100,4 +100,14 @@ public class RideCommandService {
         return "Ride canceled";
     }
 
+    public RideEntity completeRide(Long rideId) {
+        RideEntity rideEntity = rideRepository.findById(rideId).orElse(null);
+        if (rideEntity == null) {
+            throw new RideNotFoundException(rideId);
+        }
+        rideEntity.setStatus(RideStatus.COMPLETED);
+        rideRepository.save(rideEntity);
+        return rideEntity;
+    }
+
 }

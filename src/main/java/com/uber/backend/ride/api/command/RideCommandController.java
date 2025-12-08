@@ -49,4 +49,9 @@ public class RideCommandController {
         return rideCommandService.cancelRide(rideId);
     }
 
+    @PostMapping("/complete")
+    public RideEntity completeRide(@RequestBody CompleteRideDto dto, HttpServletRequest httpRequest) {
+        return rideCommandService.completeRide(dto.getRideId());
+    }
+
 }
