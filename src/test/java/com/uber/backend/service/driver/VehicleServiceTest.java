@@ -1,4 +1,4 @@
-package com.uber.backend.driver.application;
+package com.uber.backend.service.driver;
 
 import com.uber.backend.driver.application.dto.AddVehicleRequest;
 import com.uber.backend.driver.application.dto.UpdateVehicleRequest;
