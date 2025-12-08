@@ -1,8 +1,9 @@
 package com.uber.backend.ride.api;
 
 import com.uber.backend.ride.application.RideService;
+import com.uber.backend.ride.domain.model.Ride;
 import com.uber.backend.ride.dto.RidePriceRequestDto;
-import com.uber.backend.ride.dto.PriceEstimateDto;
+import com.uber.backend.ride.dto.RideRequestDto;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -27,6 +28,11 @@ public class RideController {
                 request.getDurationMin(),
                 request.getDemandMultiplier()
         );
+    }
+
+    @PostMapping("/request")
+    public Ride requestRide(@RequestBody RideRequestDto request) {
+
     }
 
 }
