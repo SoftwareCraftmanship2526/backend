@@ -23,7 +23,11 @@ public class PricingContext {
             BigDecimal fare = strategy.calculateFare(distance, duration, multiplier);
             fares.put(type, fare);
         }
-
         return fares;
+    }
+
+    public BigDecimal calculateFare(String type, double distance, int duration, double multiplier) {
+        PricingStrategy strategy = strategies.get(type);
+        return strategy.calculateFare(distance, duration, multiplier);
     }
 }

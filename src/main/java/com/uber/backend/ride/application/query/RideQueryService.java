@@ -23,4 +23,9 @@ public class RideQueryService {
         double distanceKm = distanceCalculator.calculateDistance(start, end);
         return pricingContext.calculateAllFares(distanceKm, durationMin, demandMultiplier);
     }
+
+    public BigDecimal calculateFare(String type, Location start, Location end, int durationMin, double demandMultiplier) {
+        double distanceKm = distanceCalculator.calculateDistance(start, end);
+        return pricingContext.calculateFare(type, distanceKm, durationMin, demandMultiplier);
+    }
 }
