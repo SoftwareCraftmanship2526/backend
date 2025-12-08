@@ -1,6 +1,6 @@
 package com.uber.backend.ride.infrastructure.adapter;
 
-import com.uber.backend.ride.domain.port.DistanceCalculatorPort;
+import com.uber.backend.shared.domain.port.DistanceCalculatorPort;
 import com.uber.backend.shared.domain.valueobject.Location;
 import org.springframework.stereotype.Component;
 

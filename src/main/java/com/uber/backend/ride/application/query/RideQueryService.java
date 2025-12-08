@@ -1,6 +1,6 @@
 package com.uber.backend.ride.application.query;
 
-import com.uber.backend.ride.domain.port.DistanceCalculatorPort;
+import com.uber.backend.shared.domain.port.DistanceCalculatorPort;
 import com.uber.backend.ride.domain.strategy.PricingContext;
 import com.uber.backend.shared.domain.valueobject.Location;
 import org.springframework.stereotype.Service;

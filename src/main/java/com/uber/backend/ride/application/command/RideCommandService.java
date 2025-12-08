@@ -97,8 +97,7 @@ public class RideCommandService {
         DriverEntity driverEntity = driverRepository.findById(rideEntity.getDriver().getId()).orElseThrow(()  -> new DriverNotFoundException(rideEntity.getDriver().getId()));
         driverEntity.setIsAvailable(true);
         driverRepository.save(driverEntity);
-
-        return "Ride cancelled";
+        return "Ride canceled";
     }
 
 }

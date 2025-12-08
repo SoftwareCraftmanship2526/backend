@@ -46,8 +46,7 @@ public class RideCommandController {
             throw new UnauthorizedException("You don't have access to cancel this ride");
         }
 
-        rideCommandService.cancelRide(rideId);
-        return "Ride cancelled";
+        return rideCommandService.cancelRide(rideId);
     }
 
 }

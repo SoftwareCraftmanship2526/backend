@@ -1,4 +1,4 @@
-package com.uber.backend.ride.domain.port;
+package com.uber.backend.shared.domain.port;
 
 import com.uber.backend.shared.domain.valueobject.Location;
 
