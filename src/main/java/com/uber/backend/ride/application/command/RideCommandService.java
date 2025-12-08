@@ -69,13 +69,21 @@ public class RideCommandService {
 
         rideEntity.setDriver(driverEntity);
         rideEntity.setStatus(RideStatus.ACCEPTED);
+        LocalDateTime startTime = LocalDateTime.now();
+        rideEntity.setStartedAt(startTime);
+
+        driverEntity.setIsAvailable(false);
+        driverEntity.setCurrentLocation(rideEntity.getPickupLocation());
 
         Driver driver = driverMapper.toDomain(driverEntity);
         Long vehicleId = driver.getCurrentVehicleId();
         VehicleEntity vehicleEntity = vehicleRepository.findById(vehicleId).orElse(null);
         Vehicle vehicle = vehicleMapper.toDomain(vehicleEntity);
+        rideEntity.setVehicle(vehicleEntity);
 
-        return RideAssignDto.builder().rideId(rideId).passengerId(rideEntity.getPassenger().getId()).status(RideStatus.ACCEPTED).requestedAt(rideEntity.getRequestedAt()).price(rideEntity.getFareAmount()).driver(driver).vehicle(vehicle).startTime(LocalDateTime.now()).build();
+        rideRepository.save(rideEntity);
+        driverRepository.save(driverEntity);
+        return RideAssignDto.builder().rideId(rideId).passengerId(rideEntity.getPassenger().getId()).status(RideStatus.ACCEPTED).requestedAt(rideEntity.getRequestedAt()).price(rideEntity.getFareAmount()).driver(driver).vehicle(vehicle).startTime(startTime).build();
 
     }
 
@@ -85,6 +93,10 @@ public class RideCommandService {
             throw new RideNotFoundException(rideId);
         }
         rideEntity.setStatus(RideStatus.CANCELLED);
+        rideRepository.save(rideEntity);
+        DriverEntity driverEntity = driverRepository.findById(rideEntity.getDriver().getId()).orElseThrow(()  -> new DriverNotFoundException(rideEntity.getDriver().getId()));
+        driverEntity.setIsAvailable(true);
+        driverRepository.save(driverEntity);
 
         return "Ride cancelled";
     }
