@@ -1,4 +1,4 @@
-package com.uber.backend.ride.application;
+package com.uber.backend.ride.application.query;
 
 import com.uber.backend.ride.domain.port.DistanceCalculatorPort;
 import com.uber.backend.ride.domain.strategy.PricingContext;
@@ -9,20 +9,18 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 @Service
-public class RideService {
+public class RideQueryService {
 
     private final PricingContext pricingContext;
     private final DistanceCalculatorPort distanceCalculator;
 
-    public RideService(PricingContext pricingContext, DistanceCalculatorPort distanceCalculator) {
+    public RideQueryService(PricingContext pricingContext, DistanceCalculatorPort distanceCalculator) {
         this.pricingContext = pricingContext;
         this.distanceCalculator = distanceCalculator;
     }
 
     public Map<String, BigDecimal> priceRequest(Location start, Location end, int durationMin, double demandMultiplier) {
         double distanceKm = distanceCalculator.calculateDistance(start, end);
-
         return pricingContext.calculateAllFares(distanceKm, durationMin, demandMultiplier);
-
     }
 }

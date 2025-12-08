@@ -12,5 +12,5 @@ public class PriceRequestDto {
     private Location start;
     private Location end;
     private int durationMin;
-    private double demandMutiplier;
+    private double demandMultiplier;
 }
