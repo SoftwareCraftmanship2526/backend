@@ -75,11 +75,14 @@ public class AuthExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
+        ex.printStackTrace();
+        
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
         response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.put("error", "Internal Server Error");
-        response.put("message", "An unexpected error occurred");
+        response.put("message", ex.getMessage());
+        response.put("exceptionType", ex.getClass().getSimpleName());
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
