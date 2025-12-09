@@ -1,4 +1,4 @@
-package com.uber.backend.ride.application.command;
+package com.uber.backend.ride.application;
 
 import com.uber.backend.driver.domain.model.Driver;
 import com.uber.backend.driver.domain.model.Vehicle;
@@ -10,9 +10,9 @@ import com.uber.backend.driver.infrastructure.repository.DriverRepository;
 import com.uber.backend.driver.infrastructure.repository.VehicleRepository;
 import com.uber.backend.passenger.infrastructure.persistence.PassengerEntity;
 import com.uber.backend.passenger.infrastructure.repository.PassengerRepository;
-import com.uber.backend.ride.api.dto.RideAssignDto;
-import com.uber.backend.ride.api.dto.RideRequestDto;
-import com.uber.backend.ride.api.dto.RideResponseDto;
+import com.uber.backend.ride.application.command.RideAssignCommand;
+import com.uber.backend.ride.application.command.RequestRideCommand;
+import com.uber.backend.ride.application.command.RideResponseCommand;
 import com.uber.backend.ride.application.exception.DriverNotFoundException;
 import com.uber.backend.ride.application.exception.RideNotFoundException;
 import com.uber.backend.ride.application.query.RideQueryService;
@@ -40,7 +40,7 @@ public class RideCommandService {
     private final DriverRepository driverRepository;
     private final VehicleMapper vehicleMapper;
 
-    public RideResponseDto createRideRequest(RideRequestDto dto, Long passengerId) {
+    public RideResponseCommand createRideRequest(RequestRideCommand dto, Long passengerId) {
 
         BigDecimal fare = rideQueryService.calculateFare(dto.getType(), dto.getStart(), dto.getEnd(), dto.getDurationMin(), dto.getDemandMultiplier());
         Ride ride = Ride.builder().status(RideStatus.REQUESTED).requestedAt(LocalDateTime.now()).fareAmount(fare).pickupLocation(dto.getStart()).dropoffLocation(dto.getEnd()).passengerId(passengerId).build();
@@ -54,12 +54,12 @@ public class RideCommandService {
         RideStatus status = rideEntity.getStatus();
         LocalDateTime requestedAt = rideEntity.getRequestedAt();
 
-        return RideResponseDto.builder().rideId(rideId).passengerId(passengerId).status(status).requestedAt(requestedAt).price(fare).build();
+        return RideResponseCommand.builder().rideId(rideId).passengerId(passengerId).status(status).requestedAt(requestedAt).price(fare).build();
 
 
     }
 
-    public RideAssignDto assignDriverToRide(Long rideId, Long driverId, Long passengerId) {
+    public RideAssignCommand assignDriverToRide(Long rideId, Long driverId, Long passengerId) {
         RideEntity rideEntity = rideRepository.findById(rideId).orElse(null);
         if (rideEntity == null) {
             throw new RideNotFoundException(rideId);
@@ -83,22 +83,11 @@ public class RideCommandService {
 
         rideRepository.save(rideEntity);
         driverRepository.save(driverEntity);
-        return RideAssignDto.builder().rideId(rideId).passengerId(rideEntity.getPassenger().getId()).status(RideStatus.ACCEPTED).requestedAt(rideEntity.getRequestedAt()).price(rideEntity.getFareAmount()).driver(driver).vehicle(vehicle).startTime(startTime).build();
+        return RideAssignCommand.builder().rideId(rideId).passengerId(rideEntity.getPassenger().getId()).status(RideStatus.ACCEPTED).requestedAt(rideEntity.getRequestedAt()).price(rideEntity.getFareAmount()).driver(driver).vehicle(vehicle).startTime(startTime).build();
 
     }
 
-    public String cancelRide(Long rideId) {
-        RideEntity rideEntity = rideRepository.findById(rideId).orElse(null);
-        if (rideEntity == null) {
-            throw new RideNotFoundException(rideId);
-        }
-        rideEntity.setStatus(RideStatus.CANCELLED);
-        rideRepository.save(rideEntity);
-        DriverEntity driverEntity = driverRepository.findById(rideEntity.getDriver().getId()).orElseThrow(()  -> new DriverNotFoundException(rideEntity.getDriver().getId()));
-        driverEntity.setIsAvailable(true);
-        driverRepository.save(driverEntity);
-        return "Ride canceled";
-    }
+
 
     public RideEntity completeRide(Long rideId) {
         RideEntity rideEntity = rideRepository.findById(rideId).orElse(null);
@@ -108,6 +97,12 @@ public class RideCommandService {
         rideEntity.setStatus(RideStatus.COMPLETED);
         rideRepository.save(rideEntity);
         return rideEntity;
+    }
+
+    public RideEntity acceptRide(Long rideId) {
+        RideEntity rideEntity = rideRepository.findById(rideId).orElseThrow(() -> new RideNotFoundException(rideId));
+        rideEntity.setStatus(RideStatus.ACCEPTED);
+        return rideRepository.save(rideEntity);
     }
 
 }

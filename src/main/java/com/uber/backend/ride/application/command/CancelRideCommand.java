@@ -1,4 +1,4 @@
-package com.uber.backend.ride.api.dto;
+package com.uber.backend.ride.application.command;
 
 import lombok.*;
 
@@ -7,6 +7,6 @@ import lombok.*;
 @Data
 @Getter
 @Setter
-public class RideCancelDto {
+public class CancelRideCommand {
     private Long rideId;
 }

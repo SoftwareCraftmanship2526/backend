@@ -1,4 +1,4 @@
-package com.uber.backend.ride.api.dto;
+package com.uber.backend.ride.application.command;
 
 import com.uber.backend.ride.domain.enums.RideStatus;
 import lombok.*;
@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Setter
 @SuperBuilder
 @Data
-public class RideResponseDto {
+public class RideResponseCommand {
     private Long rideId;
     private Long passengerId;
     private RideStatus status;

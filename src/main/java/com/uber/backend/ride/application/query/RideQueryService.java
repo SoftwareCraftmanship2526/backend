@@ -28,4 +28,5 @@ public class RideQueryService {
         double distanceKm = distanceCalculator.calculateDistance(start, end);
         return pricingContext.calculateFare(type, distanceKm, durationMin, demandMultiplier);
     }
+
 }

@@ -1,4 +1,4 @@
-package com.uber.backend.ride.api.dto;
+package com.uber.backend.ride.application.command;
 
 import lombok.*;
 
@@ -8,7 +8,7 @@ import lombok.*;
 @AllArgsConstructor
 @Data
 @Builder
-public class DriverAssignDto {
+public class DriverAssignCommand {
     private Long rideId;
     private Long driverId;
 }
