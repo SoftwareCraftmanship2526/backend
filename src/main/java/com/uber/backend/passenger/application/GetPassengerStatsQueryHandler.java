@@ -17,15 +17,15 @@ public class GetPassengerStatsQueryHandler {
         PassengerEntity passenger = passengerRepository.findById(query.passengerId())
                 .orElseThrow(() -> new IllegalArgumentException("Passenger not found with ID: " + query.passengerId()));
 
-        return PassengerDTO.builder()
-                .id(passenger.getId())
-                .firstName(passenger.getFirstName())
-                .lastName(passenger.getLastName())
-                .email(passenger.getEmail())
-                .phoneNumber(passenger.getPhoneNumber())
-                .passengerRating(passenger.getPassengerRating())
-                .savedAddresses(passenger.getSavedAddresses())
-                .totalRides(passenger.getRides() != null ? passenger.getRides().size() : 0)
-                .build();
+        return new PassengerDTO(
+                passenger.getId(),
+                passenger.getFirstName(),
+                passenger.getLastName(),
+                passenger.getEmail(),
+                passenger.getPhoneNumber(),
+                passenger.getPassengerRating(),
+                passenger.getSavedAddresses(),
+                passenger.getRides() != null ? passenger.getRides().size() : 0
+        );
     }
 }
