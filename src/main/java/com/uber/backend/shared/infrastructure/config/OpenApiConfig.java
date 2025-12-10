@@ -12,12 +12,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "Uber Backend API",
+                title = "MJT Rides API",
                 version = "1.0",
-                description = "REST API for Uber-like ride-sharing application with CQRS architecture",
+                description = "REST API for MJT Rides - A ride-sharing application with CQRS architecture",
                 contact = @Contact(
-                        name = "Uber Backend Team",
-                        email = "support@uber-backend.com"
+                        name = "MJT Rides Team",
+                        email = "support@mjtrides.com"
                 )
         ),
         servers = {
