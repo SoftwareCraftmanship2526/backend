@@ -16,14 +16,15 @@ import lombok.NoArgsConstructor;
 public class AuthResponse {
 
     private String token;
-    
+
     @Builder.Default
     private String tokenType = "Bearer";
-    
+
     private Long expiresIn;
     private Long userId;
     private String email;
     private String firstName;
     private String lastName;
     private Role role;
+    private Boolean emailVerified;
 }
