@@ -4,7 +4,7 @@ import com.uber.backend.auth.application.dto.AuthResponse;
 import com.uber.backend.auth.application.dto.LoginRequest;
 import com.uber.backend.auth.application.dto.RegisterDriverRequest;
 import com.uber.backend.auth.application.dto.RegisterRequest;
-import com.uber.backend.auth.application.service.AuthenticationService;
+import com.uber.backend.auth.application.service.*;
 import com.uber.backend.auth.domain.enums.Role;
 import com.uber.backend.auth.infrastructure.security.JwtService;
 import com.uber.backend.driver.infrastructure.persistence.DriverEntity;
@@ -58,6 +58,9 @@ class AuthenticationServiceTest {
 
     @Mock
     private UserDetailsService userDetailsService;
+
+    @Mock
+    private VerificationService verificationService;
 
     @InjectMocks
     private AuthenticationService authenticationService;
@@ -114,20 +117,11 @@ class AuthenticationServiceTest {
                 .password("encodedPassword")
                 .authorities(Collections.emptyList())
                 .build();
-        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
-        when(jwtService.generateToken(any(UserDetails.class), anyLong(), anyString())).thenReturn("jwt.token.here");
-        when(jwtService.getExpiration()).thenReturn(86400000L);
-
         // Act
-        AuthResponse response = authenticationService.registerPassenger(passengerRequest);
+        authenticationService.registerPassenger(passengerRequest);
 
-        // Assert
-        assertNotNull(response);
-        assertEquals("jwt.token.here", response.getToken());
-        assertEquals("Bearer", response.getTokenType());
-        assertEquals(1L, response.getUserId());
-        assertEquals("john.doe@example.com", response.getEmail());
-        assertEquals(Role.PASSENGER, response.getRole());
+        // Assert - verification email should be sent
+        verify(verificationService).generateAndSendVerificationCode("john.doe@example.com");
 
         // Verify interactions
         verify(passengerRepository).findByEmail("john.doe@example.com");
@@ -143,6 +137,7 @@ class AuthenticationServiceTest {
         assertEquals("encodedPassword", capturedPassenger.getPassword());
         assertEquals(Role.PASSENGER, capturedPassenger.getRole());
         assertEquals(5.0, capturedPassenger.getPassengerRating());
+        assertFalse(capturedPassenger.getEmailVerified());
     }
 
     @Test
@@ -166,8 +161,9 @@ class AuthenticationServiceTest {
         // Arrange
         when(passengerRepository.findByEmail(anyString())).thenReturn(Optional.empty());
         when(driverRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(driverRepository.findByLicenseNumber(anyString())).thenReturn(Optional.empty());
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        
+
         DriverEntity savedDriver = new DriverEntity();
         savedDriver.setId(2L);
         savedDriver.setFirstName("Jane");
@@ -176,24 +172,11 @@ class AuthenticationServiceTest {
         savedDriver.setRole(Role.DRIVER);
         when(driverRepository.save(any(DriverEntity.class))).thenReturn(savedDriver);
 
-        UserDetails userDetails = User.builder()
-                .username("jane.smith@example.com")
-                .password("encodedPassword")
-                .authorities(Collections.emptyList())
-                .build();
-        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
-        when(jwtService.generateToken(any(UserDetails.class), anyLong(), anyString())).thenReturn("jwt.token.driver");
-        when(jwtService.getExpiration()).thenReturn(86400000L);
-
         // Act
-        AuthResponse response = authenticationService.registerDriver(driverRequest);
+        authenticationService.registerDriver(driverRequest);
 
-        // Assert
-        assertNotNull(response);
-        assertEquals("jwt.token.driver", response.getToken());
-        assertEquals(2L, response.getUserId());
-        assertEquals("jane.smith@example.com", response.getEmail());
-        assertEquals(Role.DRIVER, response.getRole());
+        // Assert - verification email should be sent
+        verify(verificationService).generateAndSendVerificationCode("jane.smith@example.com");
 
         ArgumentCaptor<DriverEntity> driverCaptor = ArgumentCaptor.forClass(DriverEntity.class);
         verify(driverRepository).save(driverCaptor.capture());
@@ -205,6 +188,7 @@ class AuthenticationServiceTest {
         assertEquals(Role.DRIVER, capturedDriver.getRole());
         assertEquals(5.0, capturedDriver.getDriverRating());
         assertFalse(capturedDriver.getIsAvailable());
+        assertFalse(capturedDriver.getEmailVerified());
     }
 
     @Test
@@ -220,6 +204,26 @@ class AuthenticationServiceTest {
         );
 
         assertEquals("Email already registered", exception.getMessage());
+        verify(driverRepository, never()).save(any());
+    }
+
+    @Test
+    void givenRegisterRequest_whenRegisterDriver_LicenseNumberAlreadyExists_ThrowsException() {
+        // Arrange
+        when(passengerRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+        when(driverRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        DriverEntity existingDriver = new DriverEntity();
+        existingDriver.setLicenseNumber("DL-12345");
+        when(driverRepository.findByLicenseNumber("DL-12345")).thenReturn(Optional.of(existingDriver));
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> authenticationService.registerDriver(driverRequest)
+        );
+
+        assertEquals("License number already registered", exception.getMessage());
         verify(driverRepository, never()).save(any());
     }
 
@@ -243,6 +247,7 @@ class AuthenticationServiceTest {
         passenger.setLastName("Doe");
         passenger.setEmail("john.doe@example.com");
         passenger.setRole(Role.PASSENGER);
+        passenger.setEmailVerified(true);
         when(passengerRepository.findByEmail(anyString())).thenReturn(Optional.of(passenger));
 
         when(jwtService.generateToken(any(UserDetails.class), anyLong(), anyString())).thenReturn("jwt.login.token");
@@ -285,6 +290,7 @@ class AuthenticationServiceTest {
         driver.setLastName("Smith");
         driver.setEmail("jane.smith@example.com");
         driver.setRole(Role.DRIVER);
+        driver.setEmailVerified(true);
         when(driverRepository.findByEmail(anyString())).thenReturn(Optional.of(driver));
 
         when(jwtService.generateToken(any(UserDetails.class), anyLong(), anyString())).thenReturn("jwt.driver.token");
@@ -355,15 +361,6 @@ class AuthenticationServiceTest {
         savedPassenger.setLastName("Doe");
         when(passengerRepository.save(any(PassengerEntity.class))).thenReturn(savedPassenger);
 
-        UserDetails userDetails = User.builder()
-                .username("john.doe@example.com")
-                .password("super.encrypted.password")
-                .authorities(Collections.emptyList())
-                .build();
-        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
-        when(jwtService.generateToken(any(UserDetails.class), anyLong(), anyString())).thenReturn("token");
-        when(jwtService.getExpiration()).thenReturn(86400000L);
-
         // Act
         authenticationService.registerPassenger(passengerRequest);
 
@@ -373,5 +370,78 @@ class AuthenticationServiceTest {
         ArgumentCaptor<PassengerEntity> captor = ArgumentCaptor.forClass(PassengerEntity.class);
         verify(passengerRepository).save(captor.capture());
         assertEquals("super.encrypted.password", captor.getValue().getPassword());
+    }
+
+    @Test
+    void givenLoginRequest_whenLogin_PassengerEmailNotVerified_ThrowsException() {
+        // Arrange
+        Authentication authentication = mock(Authentication.class);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(authentication);
+
+        UserDetails userDetails = User.builder()
+                .username("john.doe@example.com")
+                .password("encodedPassword")
+                .authorities(Collections.emptyList())
+                .build();
+        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
+
+        PassengerEntity passenger = new PassengerEntity();
+        passenger.setId(1L);
+        passenger.setFirstName("John");
+        passenger.setLastName("Doe");
+        passenger.setEmail("john.doe@example.com");
+        passenger.setRole(Role.PASSENGER);
+        passenger.setEmailVerified(false);
+        when(passengerRepository.findByEmail(anyString())).thenReturn(Optional.of(passenger));
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> authenticationService.login(loginRequest)
+        );
+
+        assertEquals("Email not verified. Please verify your email before logging in.", exception.getMessage());
+        verify(jwtService, never()).generateToken(any(), anyLong(), anyString());
+    }
+
+    @Test
+    void givenLoginRequest_whenLogin_DriverEmailNotVerified_ThrowsException() {
+        // Arrange
+        Authentication authentication = mock(Authentication.class);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(authentication);
+
+        UserDetails userDetails = User.builder()
+                .username("jane.smith@example.com")
+                .password("encodedPassword")
+                .authorities(Collections.emptyList())
+                .build();
+        when(userDetailsService.loadUserByUsername(anyString())).thenReturn(userDetails);
+
+        when(passengerRepository.findByEmail(anyString())).thenReturn(Optional.empty());
+
+        DriverEntity driver = new DriverEntity();
+        driver.setId(2L);
+        driver.setFirstName("Jane");
+        driver.setLastName("Smith");
+        driver.setEmail("jane.smith@example.com");
+        driver.setRole(Role.DRIVER);
+        driver.setEmailVerified(false);
+        when(driverRepository.findByEmail(anyString())).thenReturn(Optional.of(driver));
+
+        LoginRequest driverLogin = LoginRequest.builder()
+                .email("jane.smith@example.com")
+                .password("Password123")
+                .build();
+
+        // Act & Assert
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> authenticationService.login(driverLogin)
+        );
+
+        assertEquals("Email not verified. Please verify your email before logging in.", exception.getMessage());
+        verify(jwtService, never()).generateToken(any(), anyLong(), anyString());
     }
 }
