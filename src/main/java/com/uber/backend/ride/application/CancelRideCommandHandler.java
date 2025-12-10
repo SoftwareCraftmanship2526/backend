@@ -2,6 +2,7 @@ package com.uber.backend.ride.application;
 
 import com.uber.backend.driver.infrastructure.persistence.DriverEntity;
 import com.uber.backend.driver.infrastructure.repository.DriverRepository;
+import com.uber.backend.ride.application.command.CancelRideCommand;
 import com.uber.backend.ride.application.exception.DriverNotFoundException;
 import com.uber.backend.ride.application.exception.RideNotFoundException;
 import com.uber.backend.ride.domain.enums.RideStatus;
@@ -15,10 +16,10 @@ import org.springframework.stereotype.Service;
 public class CancelRideCommandHandler {
     private final RideRepository rideRepository;
     private final DriverRepository driverRepository;
-    public String cancelRide(Long rideId) {
-        RideEntity rideEntity = rideRepository.findById(rideId).orElse(null);
+    public String handle(CancelRideCommand command) {
+        RideEntity rideEntity = rideRepository.findById(command.rideId()).orElse(null);
         if (rideEntity == null) {
-            throw new RideNotFoundException(rideId);
+            throw new RideNotFoundException(command.rideId());
         }
         rideEntity.setStatus(RideStatus.CANCELLED);
         rideRepository.save(rideEntity);
