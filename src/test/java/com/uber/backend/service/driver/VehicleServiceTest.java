@@ -98,10 +98,10 @@ class VehicleServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals("ABC-123", result.getLicensePlate());
-        assertEquals("Toyota Camry", result.getModel());
-        assertEquals("Black", result.getColor());
-        assertEquals(RideType.UBER_X, result.getType());
+        assertEquals("ABC-123", result.licensePlate());
+        assertEquals("Toyota Camry", result.model());
+        assertEquals("Black", result.color());
+        assertEquals(RideType.UBER_X, result.type());
 
         ArgumentCaptor<VehicleEntity> vehicleCaptor = ArgumentCaptor.forClass(VehicleEntity.class);
         verify(vehicleRepository).save(vehicleCaptor.capture());
@@ -390,8 +390,8 @@ class VehicleServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals(2, result.size());
-        assertEquals("ABC-123", result.get(0).getLicensePlate());
-        assertEquals("DEF-456", result.get(1).getLicensePlate());
+        assertEquals("ABC-123", result.get(0).licensePlate());
+        assertEquals("DEF-456", result.get(1).licensePlate());
     }
 
     @Test
@@ -420,8 +420,8 @@ class VehicleServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("ABC-123", result.getLicensePlate());
+        assertEquals(1L, result.id());
+        assertEquals("ABC-123", result.licensePlate());
     }
 
     @Test

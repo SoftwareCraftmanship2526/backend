@@ -38,6 +38,9 @@ public abstract class AccountEntity {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    @Column(name = "email_verified", nullable = false)
+    private Boolean emailVerified = false;
+
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 

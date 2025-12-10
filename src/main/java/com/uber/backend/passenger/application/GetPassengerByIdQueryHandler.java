@@ -21,15 +21,15 @@ public class GetPassengerByIdQueryHandler {
     }
 
     private PassengerDTO mapToDTO(PassengerEntity passenger) {
-        return PassengerDTO.builder()
-                .id(passenger.getId())
-                .firstName(passenger.getFirstName())
-                .lastName(passenger.getLastName())
-                .email(passenger.getEmail())
-                .phoneNumber(passenger.getPhoneNumber())
-                .passengerRating(passenger.getPassengerRating())
-                .savedAddresses(passenger.getSavedAddresses())
-                .totalRides(passenger.getRides() != null ? passenger.getRides().size() : 0)
-                .build();
+        return new PassengerDTO(
+                passenger.getId(),
+                passenger.getFirstName(),
+                passenger.getLastName(),
+                passenger.getEmail(),
+                passenger.getPhoneNumber(),
+                passenger.getPassengerRating(),
+                passenger.getSavedAddresses(),
+                passenger.getRides() != null ? passenger.getRides().size() : 0
+        );
     }
 }

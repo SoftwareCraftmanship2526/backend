@@ -39,13 +39,13 @@ public class UpdateVehicleCommandHandler {
     }
 
     private VehicleDTO mapToDTO(VehicleEntity vehicle) {
-        return VehicleDTO.builder()
-                .id(vehicle.getId())
-                .licensePlate(vehicle.getLicensePlate())
-                .model(vehicle.getModel())
-                .color(vehicle.getColor())
-                .type(vehicle.getType())
-                .driverId(vehicle.getDriver() != null ? vehicle.getDriver().getId() : null)
-                .build();
+        return new VehicleDTO(
+                vehicle.getId(),
+                vehicle.getLicensePlate(),
+                vehicle.getModel(),
+                vehicle.getColor(),
+                vehicle.getType(),
+                vehicle.getDriver() != null ? vehicle.getDriver().getId() : null
+        );
     }
 }
