@@ -39,7 +39,7 @@ public class RideController {
         if (!checkRoleService.isPassenger(passengerId)) {
             throw new UnauthorizedException("Unauthorized");
         }
-        RideRequestResult response = requestRideCommandHandler.handle(command);
+        RideRequestResult response = requestRideCommandHandler.handle(command, passengerId);
         return ResponseEntity.ok(response);
     }
 
