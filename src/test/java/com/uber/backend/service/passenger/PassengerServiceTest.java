@@ -92,13 +92,13 @@ class PassengerServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(1L, result.getId());
-        assertEquals("John", result.getFirstName());
-        assertEquals("Doe", result.getLastName());
-        assertEquals("john.doe@example.com", result.getEmail());
-        assertEquals(4.5, result.getPassengerRating());
-        assertEquals(2, result.getSavedAddresses().size());
-        assertEquals(3, result.getTotalRides());
+        assertEquals(1L, result.id());
+        assertEquals("John", result.firstName());
+        assertEquals("Doe", result.lastName());
+        assertEquals("john.doe@example.com", result.email());
+        assertEquals(4.5, result.passengerRating());
+        assertEquals(2, result.savedAddresses().size());
+        assertEquals(3, result.totalRides());
 
         verify(passengerRepository).findById(1L);
     }
@@ -160,8 +160,8 @@ class PassengerServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(3, result.getTotalRides());
-        assertEquals(4.5, result.getPassengerRating());
+        assertEquals(3, result.totalRides());
+        assertEquals(4.5, result.passengerRating());
     }
 
     @Test
@@ -176,7 +176,7 @@ class PassengerServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(0, result.getTotalRides());
+        assertEquals(0, result.totalRides());
     }
 
     // Command Handler Tests
