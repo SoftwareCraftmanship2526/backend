@@ -1,4 +1,4 @@
-package com.uber.backend.shared.api.seed;
+package com.uber.backend.shared.application;
 
 import com.uber.backend.auth.domain.enums.Role;
 import com.uber.backend.shared.domain.valueobject.Location;
@@ -89,7 +89,7 @@ public class DataSeederService {
         PassengerEntity passenger1 = new PassengerEntity();
         passenger1.setFirstName("John");
         passenger1.setLastName("Doe");
-        passenger1.setEmail("john.passenger@example.com");
+        passenger1.setEmail("john.doe@gmail.com");
         passenger1.setPassword(encodedPassword);
         passenger1.setPhoneNumber("+1-555-0101");
         passenger1.setRole(Role.PASSENGER);
@@ -103,7 +103,7 @@ public class DataSeederService {
         PassengerEntity passenger2 = new PassengerEntity();
         passenger2.setFirstName("Sarah");
         passenger2.setLastName("Johnson");
-        passenger2.setEmail("sarah.passenger@example.com");
+        passenger2.setEmail("sarah.johnson@gmail.com");
         passenger2.setPassword(encodedPassword);
         passenger2.setPhoneNumber("+1-555-0102");
         passenger2.setRole(Role.PASSENGER);
@@ -116,7 +116,7 @@ public class DataSeederService {
         PassengerEntity passenger3 = new PassengerEntity();
         passenger3.setFirstName("Michael");
         passenger3.setLastName("Chen");
-        passenger3.setEmail("michael.passenger@example.com");
+        passenger3.setEmail("michael.chen@gmail.com");
         passenger3.setPassword(encodedPassword);
         passenger3.setPhoneNumber("+1-555-0103");
         passenger3.setRole(Role.PASSENGER);
@@ -136,7 +136,7 @@ public class DataSeederService {
         DriverEntity driver1 = new DriverEntity();
         driver1.setFirstName("Robert");
         driver1.setLastName("Smith");
-        driver1.setEmail("robert.driver@example.com");
+        driver1.setEmail("robert.smith@gmail.com");
         driver1.setPassword(encodedPassword);
         driver1.setPhoneNumber("+1-555-0201");
         driver1.setRole(Role.DRIVER);
@@ -149,7 +149,7 @@ public class DataSeederService {
         DriverEntity driver2 = new DriverEntity();
         driver2.setFirstName("Emily");
         driver2.setLastName("Davis");
-        driver2.setEmail("emily.driver@example.com");
+        driver2.setEmail("emily.davis@gmail.com");
         driver2.setPassword(encodedPassword);
         driver2.setPhoneNumber("+1-555-0202");
         driver2.setRole(Role.DRIVER);
@@ -162,7 +162,7 @@ public class DataSeederService {
         DriverEntity driver3 = new DriverEntity();
         driver3.setFirstName("James");
         driver3.setLastName("Wilson");
-        driver3.setEmail("james.driver@example.com");
+        driver3.setEmail("james.wilson@gmail.com");
         driver3.setPassword(encodedPassword);
         driver3.setPhoneNumber("+1-555-0203");
         driver3.setRole(Role.DRIVER);
