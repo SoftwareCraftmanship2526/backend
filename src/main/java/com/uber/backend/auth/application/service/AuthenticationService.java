@@ -73,6 +73,7 @@ public class AuthenticationService {
     @Transactional
     public void registerDriver(RegisterDriverRequest request) {
         validateEmailNotExists(request.getEmail());
+        validateLicenseNumberNotExists(request.getLicenseNumber());
 
         DriverEntity driver = new DriverEntity();
         driver.setFirstName(request.getFirstName());
@@ -150,14 +151,26 @@ public class AuthenticationService {
 
     /**
      * Validate that email doesn't already exist in system.
-     * 
+     *
      * @param email Email to check
      * @throws IllegalArgumentException if email exists
      */
     private void validateEmailNotExists(String email) {
-        if (passengerRepository.findByEmail(email).isPresent() || 
+        if (passengerRepository.findByEmail(email).isPresent() ||
             driverRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email already registered");
+        }
+    }
+
+    /**
+     * Validate that license number doesn't already exist in system.
+     *
+     * @param licenseNumber License number to check
+     * @throws IllegalArgumentException if license number exists
+     */
+    private void validateLicenseNumberNotExists(String licenseNumber) {
+        if (driverRepository.findByLicenseNumber(licenseNumber).isPresent()) {
+            throw new IllegalArgumentException("License number already registered");
         }
     }
 
