@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
  * Comprehensive test suite for Passenger CQRS handlers.
  */
 @ExtendWith(MockitoExtension.class)
-class PassengerServiceTest {
+class PassengerCommandQueryTest {
 
     @Mock
     private PassengerRepository passengerRepository;

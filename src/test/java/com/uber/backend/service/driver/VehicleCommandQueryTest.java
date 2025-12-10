@@ -34,7 +34,7 @@ import static org.mockito.Mockito.*;
  * Comprehensive test suite for Vehicle CQRS handlers.
  */
 @ExtendWith(MockitoExtension.class)
-class VehicleServiceTest {
+class VehicleCommandQueryTest {
 
     @Mock
     private VehicleRepository vehicleRepository;
