@@ -1,10 +1,8 @@
 package com.uber.backend.auth.api.web;
 
-import com.uber.backend.auth.application.dto.AuthResponse;
-import com.uber.backend.auth.application.dto.LoginRequest;
-import com.uber.backend.auth.application.dto.RegisterDriverRequest;
-import com.uber.backend.auth.application.dto.RegisterRequest;
+import com.uber.backend.auth.application.dto.*;
 import com.uber.backend.auth.application.service.AuthenticationService;
+import com.uber.backend.auth.application.service.VerificationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,6 +32,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthenticationService authenticationService;
+    private final VerificationService verificationService;
 
     /**
      * Register a new passenger account.
@@ -44,22 +43,24 @@ public class AuthController {
     @PostMapping("/register/passenger")
     @Operation(
             summary = "Register as Passenger",
-            description = "Create a new passenger account and receive JWT authentication token"
+            description = "Create a new passenger account and send verification email with 6-digit code"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "Passenger registered successfully",
-                    content = @Content(schema = @Schema(implementation = AuthResponse.class))
+                    description = "Passenger registered successfully, verification email sent"
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = "Invalid input data or email already exists"
             )
     })
-    public ResponseEntity<AuthResponse> registerPassenger(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<Map<String, String>> registerPassenger(@Valid @RequestBody RegisterRequest request) {
         try {
-            AuthResponse response = authenticationService.registerPassenger(request);
+            authenticationService.registerPassenger(request);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Registration successful! A verification code has been sent to " + request.getEmail());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
             throw e;
@@ -75,22 +76,24 @@ public class AuthController {
     @PostMapping("/register/driver")
     @Operation(
             summary = "Register as Driver",
-            description = "Create a new driver account with license information and receive JWT authentication token"
+            description = "Create a new driver account with license information and send verification email with 6-digit code"
     )
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "Driver registered successfully",
-                    content = @Content(schema = @Schema(implementation = AuthResponse.class))
+                    description = "Driver registered successfully, verification email sent"
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = "Invalid input data or email already exists"
             )
     })
-    public ResponseEntity<AuthResponse> registerDriver(@Valid @RequestBody RegisterDriverRequest request) {
+    public ResponseEntity<Map<String, String>> registerDriver(@Valid @RequestBody RegisterDriverRequest request) {
         try {
-            AuthResponse response = authenticationService.registerDriver(request);
+            authenticationService.registerDriver(request);
+
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Registration successful! A verification code has been sent to " + request.getEmail());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IllegalArgumentException e) {
             throw e;
@@ -154,6 +157,62 @@ public class AuthController {
         response.put("authorities", authentication.getAuthorities());
         response.put("authenticated", authentication.isAuthenticated());
         
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Verify email with 6-digit code.
+     *
+     * @param request Email and verification code
+     * @return Success message
+     */
+    @PostMapping("/verify-email")
+    @Operation(
+            summary = "Verify Email",
+            description = "Verify user email address with 6-digit code and receive JWT authentication token"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Email verified successfully, returns authentication token",
+                    content = @Content(schema = @Schema(implementation = AuthResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid or expired verification code"
+            )
+    })
+    public ResponseEntity<AuthResponse> verifyEmail(@Valid @RequestBody VerifyEmailRequest request) {
+        AuthResponse response = verificationService.verifyEmail(request.getEmail(), request.getCode());
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Resend verification code to email.
+     *
+     * @param request Email to resend code to
+     * @return Success message
+     */
+    @PostMapping("/resend-verification")
+    @Operation(
+            summary = "Resend Verification Code",
+            description = "Resend verification code to user's email"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Verification code sent successfully"
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Email not found or already verified"
+            )
+    })
+    public ResponseEntity<Map<String, String>> resendVerification(@Valid @RequestBody ResendCodeRequest request) {
+        verificationService.resendVerificationCode(request.getEmail());
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Verification code sent to your email.");
         return ResponseEntity.ok(response);
     }
 
