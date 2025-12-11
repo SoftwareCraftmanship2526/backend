@@ -32,6 +32,10 @@ public class RideEntity {
     @Column(nullable = false)
     private RideStatus status;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "ride_type", nullable = false)
+    private com.uber.backend.ride.domain.enums.RideType rideType;
+
     @Column(name = "requested_at", nullable = false)
     private LocalDateTime requestedAt;
 
@@ -41,8 +45,14 @@ public class RideEntity {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
-    @Column(name = "fare_amount", precision = 10, scale = 2)
-    private BigDecimal fareAmount;
+    @Column(name = "distance_km")
+    private Double distanceKm;
+
+    @Column(name = "duration_min")
+    private Integer durationMin;
+
+    @Column(name = "demand_multiplier")
+    private Double demandMultiplier;
 
     @Embedded
     @AttributeOverrides({
