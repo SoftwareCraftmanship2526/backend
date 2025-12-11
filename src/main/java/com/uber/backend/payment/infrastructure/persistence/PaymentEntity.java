@@ -36,7 +36,7 @@ public class PaymentEntity {
     private String transactionId;
 
     @OneToOne
-    @JoinColumn(name = "ride_id", nullable = false)
+    @JoinColumn(name = "ride_id", nullable = false, unique = true)
     private RideEntity ride;
 
     @PrePersist
