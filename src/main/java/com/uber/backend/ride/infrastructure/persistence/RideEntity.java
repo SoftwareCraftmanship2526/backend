@@ -7,10 +7,10 @@ import com.uber.backend.payment.infrastructure.persistence.PaymentEntity;
 import com.uber.backend.rating.infrastructure.persistence.RatingEntity;
 import com.uber.backend.shared.domain.valueobject.Location;
 import com.uber.backend.ride.domain.enums.RideStatus;
+import com.uber.backend.ride.domain.enums.RideType;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +34,7 @@ public class RideEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "ride_type", nullable = false)
-    private com.uber.backend.ride.domain.enums.RideType rideType;
+    private RideType rideType;
 
     @Column(name = "requested_at", nullable = false)
     private LocalDateTime requestedAt;
@@ -88,6 +88,12 @@ public class RideEntity {
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<RatingEntity> ratings = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "ride_denied_drivers", joinColumns = @JoinColumn(name = "ride_id"))
+    @Column(name = "driver_id")
+    @Builder.Default
+    private List<Long> deniedDriverIds = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
