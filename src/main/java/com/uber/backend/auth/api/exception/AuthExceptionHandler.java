@@ -6,6 +6,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
@@ -75,15 +76,20 @@ public class AuthExceptionHandler {
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
-        ex.printStackTrace();
-        
+
+        // ⭐ If exception has @ResponseStatus, rethrow it so Spring handles it properly
+        ResponseStatus responseStatus = ex.getClass().getAnnotation(ResponseStatus.class);
+        if (responseStatus != null) {
+            throw new RuntimeException(ex);
+        }
+
         Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
         response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         response.put("error", "Internal Server Error");
-        response.put("message", ex.getMessage());
-        response.put("exceptionType", ex.getClass().getSimpleName());
+        response.put("message", "An unexpected error occurred");
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
+
 }
