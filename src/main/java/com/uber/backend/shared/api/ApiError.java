@@ -4,18 +4,20 @@ import java.time.Instant;
 
 public class ApiError {
 
-    private final int status;
+    private final String error;
     private final String message;
     private final Instant timestamp;
+    private final int status;
 
-    public ApiError(int status, String message) {
-        this.status = status;
+    public ApiError(String error, String message, int status) {
+        this.error = error;
         this.message = message;
         this.timestamp = Instant.now();
+        this.status = status;
     }
 
-    public int getStatus() {
-        return status;
+    public String getError() {
+        return error;
     }
 
     public String getMessage() {
@@ -24,5 +26,9 @@ public class ApiError {
 
     public Instant getTimestamp() {
         return timestamp;
+    }
+
+    public int getStatus() {
+        return status;
     }
 }
