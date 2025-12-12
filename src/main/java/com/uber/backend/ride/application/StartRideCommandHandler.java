@@ -1,8 +1,6 @@
 package com.uber.backend.ride.application;
 
-import com.uber.backend.driver.infrastructure.persistence.DriverEntity;
-import com.uber.backend.driver.infrastructure.repository.DriverRepository;
-import com.uber.backend.ride.application.command.DriverAcceptCommand;
+import com.uber.backend.ride.application.command.StartRideCommand;
 import com.uber.backend.ride.application.exception.RideNotFoundException;
 import com.uber.backend.ride.application.query.RideResult;
 import com.uber.backend.ride.domain.enums.RideStatus;
@@ -12,45 +10,33 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
-public class DriverAcceptCommandHandler {
+public class StartRideCommandHandler {
 
     private final RideRepository rideRepository;
-    private final DriverRepository driverRepository;
 
     @Transactional
-    public RideResult handle(DriverAcceptCommand command, Long driverId) {
+    public RideResult handle(StartRideCommand command, Long driverId) {
         // Find the ride
         RideEntity rideEntity = rideRepository.findById(command.rideId())
                 .orElseThrow(() -> new RideNotFoundException(command.rideId()));
 
-        // Validate current status - allow both REQUESTED and INVITED
-        if (rideEntity.getStatus() != RideStatus.REQUESTED && rideEntity.getStatus() != RideStatus.INVITED) {
-            throw new IllegalArgumentException("Ride must be in REQUESTED or INVITED status to be accepted. Current status: " + rideEntity.getStatus());
+        // Validate current status
+        if (rideEntity.getStatus() != RideStatus.ACCEPTED) {
+            throw new IllegalArgumentException("Ride must be in ACCEPTED status to be started. Current status: " + rideEntity.getStatus());
         }
 
-        // Find the driver
-        DriverEntity driverEntity = driverRepository.findById(driverId)
-                .orElseThrow(() -> new IllegalArgumentException("Driver not found: " + driverId));
-
-        // If ride is INVITED, verify the driver is the invited one
-        if (rideEntity.getStatus() == RideStatus.INVITED) {
-            if (rideEntity.getDriver() == null || !rideEntity.getDriver().getId().equals(driverId)) {
-                throw new IllegalArgumentException("Cannot accept ride " + command.rideId() + ": This ride is assigned to a different driver");
-            }
-        } else {
-            // If REQUESTED (no poller invitation yet), assign the driver
-            rideEntity.setDriver(driverEntity);
+        // Validate that the logged-in driver is the one assigned to this ride
+        if (rideEntity.getDriver() == null || !rideEntity.getDriver().getId().equals(driverId)) {
+            throw new IllegalArgumentException("Cannot start ride " + command.rideId() + ": This ride is assigned to a different driver");
         }
 
-        // Set the vehicle from the driver's current vehicle
-        if (driverEntity.getCurrentVehicle() != null) {
-            rideEntity.setVehicle(driverEntity.getCurrentVehicle());
-        }
-
-        // Update status to ACCEPTED
-        rideEntity.setStatus(RideStatus.ACCEPTED);
+        // Update status and set startedAt
+        rideEntity.setStatus(RideStatus.IN_PROGRESS);
+        rideEntity.setStartedAt(LocalDateTime.now());
 
         rideEntity = rideRepository.save(rideEntity);
         return mapToRideResult(rideEntity);

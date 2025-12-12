@@ -23,8 +23,8 @@ public class ProcessPaymentCommandHandler {
     private final PaymentRepository paymentRepository;
 
     @Transactional
-    public ProcessPaymentResult handle(ProcessPaymentCommand command) {
-        log.info("Processing payment for ride: {}", command.rideId());
+    public ProcessPaymentResult handle(ProcessPaymentCommand command, Long passengerId) {
+        log.info("Processing payment for ride: {} by passenger: {}", command.rideId(), passengerId);
 
         // Find existing payment for this ride
         PaymentEntity payment = paymentRepository.findByRideId(command.rideId())
@@ -33,6 +33,14 @@ public class ProcessPaymentCommandHandler {
         // Verify payment is in pending status
         if (payment.getStatus() != PaymentStatus.PENDING) {
             throw new IllegalStateException("Payment already processed with status: " + payment.getStatus());
+        }
+
+        // Verify the passenger owns this payment (through the ride)
+        if (payment.getRide() == null || payment.getRide().getPassenger() == null) {
+            throw new IllegalStateException("Payment has no associated ride or passenger");
+        }
+        if (!payment.getRide().getPassenger().getId().equals(passengerId)) {
+            throw new IllegalArgumentException("Cannot process payment for ride " + command.rideId() + ": This ride belongs to a different passenger");
         }
 
         // Process payment (mock - just generate transaction ID)
