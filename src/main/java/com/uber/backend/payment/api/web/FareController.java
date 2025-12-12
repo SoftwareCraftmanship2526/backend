@@ -4,6 +4,7 @@ import com.uber.backend.payment.application.CalculateFareQueryHandler;
 import com.uber.backend.payment.application.query.CalculateFareQuery;
 import com.uber.backend.payment.application.query.FareCalculationResult;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/fares")
 @RequiredArgsConstructor
 @Tag(name = "Fare", description = "Fare calculation APIs")
+@SecurityRequirement(name = "bearerAuth")
 public class FareController {
 
     private final CalculateFareQueryHandler calculateFareQueryHandler;
