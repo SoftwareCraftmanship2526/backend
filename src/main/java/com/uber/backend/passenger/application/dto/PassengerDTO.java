@@ -1,33 +1,19 @@
 package com.uber.backend.passenger.application.dto;
 
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 
 /**
- * DTO for passenger responses.
+ * Response DTO for passenger information.
+ * Used to return passenger data from the application layer,
+ * avoiding circular references and N+1 query issues from entity relationships.
  */
-@Getter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PassengerDTO {
-    
-    private Long id;
-    private String firstName;
-    private String lastName;
-    private String email;
-    private String phoneNumber;
-    
-    @DecimalMin(value = "0.0", message = "Rating must be at least 0.0")
-    @DecimalMax(value = "5.0", message = "Rating must be at most 5.0")
-    private Double passengerRating;
-    
-    private List<String> savedAddresses;
-    private Integer totalRides;
-}
+public record PassengerDTO(
+        Long id,
+        String firstName,
+        String lastName,
+        String email,
+        String phoneNumber,
+        Double passengerRating,
+        List<String> savedAddresses,
+        Integer totalRides
+) {}

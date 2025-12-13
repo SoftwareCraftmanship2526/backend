@@ -94,6 +94,7 @@ public class DataSeederService {
         passenger1.setPhoneNumber("+1-555-0101");
         passenger1.setRole(Role.PASSENGER);
         passenger1.setPassengerRating(4.8);
+        passenger1.setEmailVerified(true);
         passenger1.setSavedAddresses(Arrays.asList(
                 "Home: 123 Oak Street, New York, NY 10001",
                 "Work: 456 Corporate Plaza, New York, NY 10005"
@@ -107,6 +108,7 @@ public class DataSeederService {
         passenger2.setPhoneNumber("+1-555-0102");
         passenger2.setRole(Role.PASSENGER);
         passenger2.setPassengerRating(4.9);
+        passenger2.setEmailVerified(true);
         passenger2.setSavedAddresses(Arrays.asList(
                 "Home: 789 Elm Avenue, Brooklyn, NY 11201"
         ));
@@ -119,6 +121,7 @@ public class DataSeederService {
         passenger3.setPhoneNumber("+1-555-0103");
         passenger3.setRole(Role.PASSENGER);
         passenger3.setPassengerRating(4.6);
+        passenger3.setEmailVerified(true);
         passenger3.setSavedAddresses(Arrays.asList(
                 "Home: 321 Pine Road, Queens, NY 11354",
                 "Gym: 555 Fitness Street, Queens, NY 11355"
@@ -140,6 +143,7 @@ public class DataSeederService {
         driver1.setDriverRating(4.9);
         driver1.setIsAvailable(true);
         driver1.setLicenseNumber("DL-NY-123456");
+        driver1.setEmailVerified(true);
         driver1.setCurrentLocation(new Location(40.7128, -74.0060, "Times Square, New York, NY"));
 
         DriverEntity driver2 = new DriverEntity();
@@ -152,6 +156,7 @@ public class DataSeederService {
         driver2.setDriverRating(4.95);
         driver2.setIsAvailable(true);
         driver2.setLicenseNumber("DL-NY-789012");
+        driver2.setEmailVerified(true);
         driver2.setCurrentLocation(new Location(40.7589, -73.9851, "Central Park, New York, NY"));
 
         DriverEntity driver3 = new DriverEntity();
@@ -164,6 +169,7 @@ public class DataSeederService {
         driver3.setDriverRating(4.7);
         driver3.setIsAvailable(false);
         driver3.setLicenseNumber("DL-NY-345678");
+        driver3.setEmailVerified(true);
         driver3.setCurrentLocation(new Location(40.7580, -73.9855, "Columbus Circle, New York, NY"));
 
         return driverRepository.saveAll(Arrays.asList(driver1, driver2, driver3));

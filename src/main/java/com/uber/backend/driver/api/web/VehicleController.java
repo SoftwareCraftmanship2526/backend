@@ -6,8 +6,6 @@ import com.uber.backend.driver.application.command.AddVehicleCommand;
 import com.uber.backend.driver.application.command.DeleteVehicleCommand;
 import com.uber.backend.driver.application.command.SetCurrentVehicleCommand;
 import com.uber.backend.driver.application.command.UpdateVehicleCommand;
-import com.uber.backend.driver.application.dto.AddVehicleRequest;
-import com.uber.backend.driver.application.dto.UpdateVehicleRequest;
 import com.uber.backend.driver.application.dto.VehicleDTO;
 import com.uber.backend.driver.application.query.GetDriverVehiclesQuery;
 import com.uber.backend.driver.application.query.GetVehicleByIdQuery;
@@ -50,7 +48,7 @@ public class VehicleController {
     /**
      * Add a new vehicle for the authenticated driver.
      *
-     * @param request Vehicle details (license plate, model, color, type)
+     * @param command Vehicle details (license plate, model, color, type)
      * @param httpRequest HTTP request containing JWT token
      * @return Created vehicle information
      */
@@ -80,18 +78,18 @@ public class VehicleController {
             )
     })
     public ResponseEntity<VehicleDTO> addVehicle(
-            @Valid @RequestBody AddVehicleRequest request,
+            @Valid @RequestBody AddVehicleCommand command,
             HttpServletRequest httpRequest
     ) {
         Long driverId = jwtUtil.extractUserIdFromRequest(httpRequest);
-        AddVehicleCommand command = new AddVehicleCommand(
+        AddVehicleCommand commandWithDriverId = new AddVehicleCommand(
                 driverId,
-                request.getLicensePlate(),
-                request.getModel(),
-                request.getColor(),
-                request.getType()
+                command.licensePlate(),
+                command.model(),
+                command.color(),
+                command.type()
         );
-        VehicleDTO vehicle = addVehicleHandler.handle(command);
+        VehicleDTO vehicle = addVehicleHandler.handle(commandWithDriverId);
         return ResponseEntity.status(HttpStatus.CREATED).body(vehicle);
     }
 
@@ -170,7 +168,7 @@ public class VehicleController {
      * Update vehicle information.
      *
      * @param vehicleId ID of the vehicle to update
-     * @param request Updated vehicle details (model, color, type)
+     * @param command Updated vehicle details (model, color, type)
      * @param httpRequest HTTP request containing JWT token
      * @return Updated vehicle information
      */
@@ -205,18 +203,18 @@ public class VehicleController {
     })
     public ResponseEntity<VehicleDTO> updateVehicle(
             @PathVariable Long vehicleId,
-            @Valid @RequestBody UpdateVehicleRequest request,
+            @Valid @RequestBody UpdateVehicleCommand command,
             HttpServletRequest httpRequest
     ) {
         Long driverId = jwtUtil.extractUserIdFromRequest(httpRequest);
-        UpdateVehicleCommand command = new UpdateVehicleCommand(
+        UpdateVehicleCommand commandWithIds = new UpdateVehicleCommand(
                 vehicleId,
                 driverId,
-                request.getModel(),
-                request.getColor(),
-                request.getType()
+                command.model(),
+                command.color(),
+                command.type()
         );
-        VehicleDTO vehicle = updateVehicleHandler.handle(command);
+        VehicleDTO vehicle = updateVehicleHandler.handle(commandWithIds);
         return ResponseEntity.ok(vehicle);
     }
 

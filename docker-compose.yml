@@ -20,6 +20,10 @@ services:
       - DB_PASSWORD=${POSTGRES_PASSWORD}
       - DDL_AUTO=${DDL_AUTO:-update}
       - JWT_SECRET=${JWT_SECRET}
+      - MAIL_HOST=${MAIL_HOST}
+      - MAIL_PORT=${MAIL_PORT}
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
     depends_on:
       db:
         condition: service_healthy

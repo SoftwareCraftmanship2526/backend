@@ -34,16 +34,17 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final VerificationService verificationService;
 
     /**
      * Register a new passenger account.
-     * 
+     * Sends verification email with 6-digit code.
+     *
      * @param request Registration details
-     * @return Authentication response with JWT token
      * @throws IllegalArgumentException if email already exists
      */
     @Transactional
-    public AuthResponse registerPassenger(RegisterRequest request) {
+    public void registerPassenger(RegisterRequest request) {
         validateEmailNotExists(request.getEmail());
 
         PassengerEntity passenger = new PassengerEntity();
@@ -54,23 +55,25 @@ public class AuthenticationService {
         passenger.setPhoneNumber(request.getPhoneNumber());
         passenger.setRole(Role.PASSENGER);
         passenger.setPassengerRating(5.0);
+        passenger.setEmailVerified(false);
 
         passenger = passengerRepository.save(passenger);
 
-        return generateAuthResponse(passenger.getId(), passenger.getEmail(), 
-                passenger.getFirstName(), passenger.getLastName(), Role.PASSENGER);
+        // Send verification email
+        verificationService.generateAndSendVerificationCode(passenger.getEmail());
     }
 
     /**
      * Register a new driver account.
-     * 
+     * Sends verification email with 6-digit code.
+     *
      * @param request Driver registration details
-     * @return Authentication response with JWT token
      * @throws IllegalArgumentException if email already exists
      */
     @Transactional
-    public AuthResponse registerDriver(RegisterDriverRequest request) {
+    public void registerDriver(RegisterDriverRequest request) {
         validateEmailNotExists(request.getEmail());
+        validateLicenseNumberNotExists(request.getLicenseNumber());
 
         DriverEntity driver = new DriverEntity();
         driver.setFirstName(request.getFirstName());
@@ -82,19 +85,21 @@ public class AuthenticationService {
         driver.setLicenseNumber(request.getLicenseNumber());
         driver.setDriverRating(5.0);
         driver.setIsAvailable(false);
+        driver.setEmailVerified(false);
 
         driver = driverRepository.save(driver);
 
-        return generateAuthResponse(driver.getId(), driver.getEmail(), 
-                driver.getFirstName(), driver.getLastName(), Role.DRIVER);
+        // Send verification email
+        verificationService.generateAndSendVerificationCode(driver.getEmail());
     }
 
     /**
      * Authenticate user and generate JWT token.
-     * 
+     *
      * @param request Login credentials
      * @return Authentication response with JWT token
      * @throws org.springframework.security.authentication.BadCredentialsException if credentials are invalid
+     * @throws IllegalArgumentException if email is not verified
      */
     public AuthResponse login(LoginRequest request) {
 
@@ -105,14 +110,14 @@ public class AuthenticationService {
                 )
         );
 
-
         UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
-        
+
         Long userId;
         String firstName;
         String lastName;
         Role role;
-        
+        Boolean emailVerified;
+
         var passengerOpt = passengerRepository.findByEmail(request.getEmail());
         if (passengerOpt.isPresent()) {
             var passenger = passengerOpt.get();
@@ -120,6 +125,12 @@ public class AuthenticationService {
             firstName = passenger.getFirstName();
             lastName = passenger.getLastName();
             role = passenger.getRole();
+            emailVerified = passenger.getEmailVerified();
+
+            // Check if email is verified
+            if (!emailVerified) {
+                throw new IllegalArgumentException("Email not verified. Please verify your email before logging in.");
+            }
         } else {
             var driver = driverRepository.findByEmail(request.getEmail())
                     .orElseThrow(() -> new IllegalStateException("User not found after authentication"));
@@ -127,39 +138,58 @@ public class AuthenticationService {
             firstName = driver.getFirstName();
             lastName = driver.getLastName();
             role = driver.getRole();
+            emailVerified = driver.getEmailVerified();
+
+            // Check if email is verified
+            if (!emailVerified) {
+                throw new IllegalArgumentException("Email not verified. Please verify your email before logging in.");
+            }
         }
 
-        return generateAuthResponse(userId, request.getEmail(), firstName, lastName, role);
+        return generateAuthResponse(userId, request.getEmail(), firstName, lastName, role, emailVerified);
     }
 
     /**
      * Validate that email doesn't already exist in system.
-     * 
+     *
      * @param email Email to check
      * @throws IllegalArgumentException if email exists
      */
     private void validateEmailNotExists(String email) {
-        if (passengerRepository.findByEmail(email).isPresent() || 
+        if (passengerRepository.findByEmail(email).isPresent() ||
             driverRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email already registered");
         }
     }
 
     /**
+     * Validate that license number doesn't already exist in system.
+     *
+     * @param licenseNumber License number to check
+     * @throws IllegalArgumentException if license number exists
+     */
+    private void validateLicenseNumberNotExists(String licenseNumber) {
+        if (driverRepository.findByLicenseNumber(licenseNumber).isPresent()) {
+            throw new IllegalArgumentException("License number already registered");
+        }
+    }
+
+    /**
      * Generate authentication response with JWT token.
-     * 
+     *
      * @param userId User ID
      * @param email User email
      * @param firstName User first name
      * @param lastName User last name
      * @param role User role
+     * @param emailVerified Email verification status
      * @return Authentication response
      */
-    private AuthResponse generateAuthResponse(Long userId, String email, String firstName, 
-                                              String lastName, Role role) {
+    private AuthResponse generateAuthResponse(Long userId, String email, String firstName,
+                                              String lastName, Role role, Boolean emailVerified) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
         String token = jwtService.generateToken(userDetails, userId, role.name());
-        
+
         return AuthResponse.builder()
                 .token(token)
                 .tokenType("Bearer")
@@ -169,6 +199,7 @@ public class AuthenticationService {
                 .firstName(firstName)
                 .lastName(lastName)
                 .role(role)
+                .emailVerified(emailVerified)
                 .build();
     }
 
