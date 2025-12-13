@@ -8,6 +8,7 @@ import com.uber.backend.ride.domain.enums.RideStatus;
 import com.uber.backend.ride.domain.enums.RideType;
 import com.uber.backend.ride.infrastructure.persistence.RideEntity;
 import com.uber.backend.ride.infrastructure.repository.RideRepository;
+import com.uber.backend.shared.domain.port.GeocodingPort;
 import com.uber.backend.shared.domain.valueobject.Location;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class RequestRideCommandHandler {
 
     private final RideRepository rideRepository;
     private final PassengerRepository passengerRepository;
+    private final GeocodingPort geocodingPort;
 
     public RideRequestResult handle(RequestRideCommand command, Long passengerId) {
 
@@ -31,18 +33,30 @@ public class RequestRideCommandHandler {
         PassengerEntity passenger = passengerRepository.findById(passengerId)
                 .orElseThrow(() -> new IllegalArgumentException("Passenger not found: " + passengerId));
 
+        // Resolve pickup address from coordinates
+        String pickupAddress = geocodingPort.getAddressFromCoordinates(
+            command.pickupLatitude(), 
+            command.pickupLongitude()
+        );
+
         // Create pickup location
         Location pickupLocation = new Location(
             command.pickupLatitude(),
             command.pickupLongitude(),
-            command.pickupAddress()
+            pickupAddress
+        );
+
+        // Resolve dropoff address from coordinates
+        String dropoffAddress = geocodingPort.getAddressFromCoordinates(
+            command.dropoffLatitude(), 
+            command.dropoffLongitude()
         );
 
         // Create dropoff location
         Location dropoffLocation = new Location(
             command.dropoffLatitude(),
             command.dropoffLongitude(),
-            command.dropoffAddress()
+            dropoffAddress
         );
 
         // Create ride entity

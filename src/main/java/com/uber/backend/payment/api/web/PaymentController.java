@@ -7,7 +7,8 @@ import com.uber.backend.payment.application.command.ProcessPaymentCommand;
 import com.uber.backend.payment.application.command.ProcessPaymentResult;
 import com.uber.backend.payment.application.query.GetPaymentHistoryQuery;
 import com.uber.backend.payment.application.query.PaymentHistoryResult;
-import com.uber.backend.shared.applicaition.CheckRoleService;
+import com.uber.backend.shared.application.CheckRoleService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

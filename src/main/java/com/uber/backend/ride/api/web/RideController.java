@@ -3,22 +3,18 @@ package com.uber.backend.ride.api.web;
 import com.uber.backend.auth.infrastructure.security.JwtUtil;
 import com.uber.backend.ride.application.*;
 import com.uber.backend.ride.application.command.*;
-import com.uber.backend.ride.application.exception.RideNotFoundException;
 import com.uber.backend.ride.application.exception.UnauthorizedException;
 import com.uber.backend.ride.application.query.GetRideQuery;
 import com.uber.backend.ride.application.query.RideResult;
-import com.uber.backend.ride.infrastructure.persistence.RideEntity;
 import com.uber.backend.ride.infrastructure.repository.RideRepository;
-import com.uber.backend.shared.applicaition.CheckRoleService;
+import com.uber.backend.shared.application.CheckRoleService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -34,8 +30,6 @@ public class RideController {
     private final JwtUtil jwtUtil;
     private final CheckRoleService checkRoleService;
     private final RideRepository rideRepository;
-    private final CreateRideCommandHandler createRideCommandHandler;
-    private final UpdateRideStatusCommandHandler updateRideStatusCommandHandler;
     private final GetRideQueryHandler getRideQueryHandler;
     private final RequestRideCommandHandler requestRideCommandHandler;
     private final DriverAcceptCommandHandler driverAcceptCommandHandler;
@@ -48,31 +42,6 @@ public class RideController {
     @Operation(summary = "Get ride", description = "Get a ride by ID with payment information (if completed)")
     public ResponseEntity<RideResult> getRide(@PathVariable Long id) {
         RideResult result = getRideQueryHandler.handle(new GetRideQuery(id));
-        return ResponseEntity.ok(result);
-    }
-
-    @PostMapping
-    @Operation(summary = "Create ride", description = "Create a new ride (usually with REQUESTED status)")
-    public ResponseEntity<CreateRideResult> createRide(@Valid @RequestBody CreateRideCommand command) {
-        CreateRideResult result = createRideCommandHandler.handle(command);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
-    }
-
-    @PatchMapping("/{id}/status")
-    @Operation(summary = "Update ride status", description = "Update ride status. When status changes to COMPLETED, a pending payment is automatically created.")
-    public ResponseEntity<UpdateRideStatusResult> updateRideStatus(
-            @PathVariable Long id,
-            @RequestBody UpdateRideStatusCommand command) {
-        // Build command with rideId from path variable
-        UpdateRideStatusCommand updatedCommand = new UpdateRideStatusCommand(
-                id,
-                command.newStatus(),
-                command.driverId(),
-                command.distanceKm(),
-                command.durationMin(),
-                command.demandMultiplier()
-        );
-        UpdateRideStatusResult result = updateRideStatusCommandHandler.handle(updatedCommand);
         return ResponseEntity.ok(result);
     }
 

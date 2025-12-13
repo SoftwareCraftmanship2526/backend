@@ -1,4 +1,4 @@
-package com.uber.backend.shared.applicaition;
+package com.uber.backend.shared.application;
 
 import com.uber.backend.driver.infrastructure.persistence.DriverEntity;
 import com.uber.backend.driver.infrastructure.repository.DriverRepository;
