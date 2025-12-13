@@ -45,6 +45,9 @@ public class RideEntity {
     @Column(name = "completed_at")
     private LocalDateTime completedAt;
 
+    @Column(name = "invited_at")
+    private LocalDateTime invitedAt;
+
     @Column(name = "distance_km")
     private Double distanceKm;
 
