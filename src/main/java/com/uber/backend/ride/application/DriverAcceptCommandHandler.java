@@ -51,6 +51,7 @@ public class DriverAcceptCommandHandler {
 
         // Update status to ACCEPTED
         rideEntity.setStatus(RideStatus.ACCEPTED);
+        rideEntity.setInvitedAt(null);
 
         rideEntity = rideRepository.save(rideEntity);
         return mapToRideResult(rideEntity);
