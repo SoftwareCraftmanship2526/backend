@@ -4,7 +4,7 @@ Welcome to the Uber-like Backend API documentation!
 
 Before doing any testing read the 'Seed Database' part of the readme
 
-##Event Storming
+## Event Storming
 You can find the event storming here:
 https://miro.com/app/board/uXjVGex5fVY=/
 
