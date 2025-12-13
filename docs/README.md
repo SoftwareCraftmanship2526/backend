@@ -2,6 +2,8 @@
 
 Welcome to the Uber-like Backend API documentation!
 
+Before doing any testing read the 'Seed Database' part of the readme
+
 ## Architecture
 
 This project implements **Screaming Architecture** - an architectural approach where the codebase structure immediately reveals what the application does.

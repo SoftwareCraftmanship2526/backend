@@ -28,9 +28,9 @@ public class RequestRideCommandHandler {
     public RideRequestResult handle(RequestRideCommand command, Long passengerId) {
 
         BigDecimal fare = rideQueryService.calculateFare(command.type(), command.start(), command.end(), command.durationMin(), command.demandMultiplier()) ;
-        Ride ride = Ride.builder().status(RideStatus.REQUESTED).requestedAt(LocalDateTime.now()).fareAmount(fare).pickupLocation(command.start()).dropoffLocation(command.end()).passengerId(command.passengerId()).build();
+        Ride ride = Ride.builder().status(RideStatus.REQUESTED).requestedAt(LocalDateTime.now()).fareAmount(fare).pickupLocation(command.start()).dropoffLocation(command.end()).passengerId(passengerId).build();
         RideEntity rideEntity = rideMapper.toEntity(ride);
-        PassengerEntity passengerEntity = passengerRepository.findById(command.passengerId()).orElse(null);
+        PassengerEntity passengerEntity = passengerRepository.findById(passengerId).orElse(null);
         rideEntity.setPassenger(passengerEntity);
 
         rideRepository.save(rideEntity);
