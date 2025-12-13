@@ -132,20 +132,13 @@ public class RideController {
     }
 
     @PostMapping("/cancel")
-    @Operation(summary = "Cancel ride", description = "Cancel a ride")
-    public ResponseEntity<String> cancelRide(@RequestBody CancelRideCommand command, HttpServletRequest httpRequest) {
+    @Operation(summary = "Cancel ride", description = "Passenger cancels a ride. Fee policy: cancel before acceptance = free, cancel within 5 min after acceptance = free, cancel after 5+ min = €5 base fee + €1 per additional minute")
+    public ResponseEntity<CancelRideResult> cancelRide(@RequestBody CancelRideCommand command, HttpServletRequest httpRequest) {
         Long passengerId = jwtUtil.extractUserIdFromRequest(httpRequest);
         if (!checkRoleService.isPassenger(passengerId)) {
-            throw new UnauthorizedException("Unauthorized");
+            throw new UnauthorizedException("Only passengers can cancel rides. Please log in as a passenger.");
         }
-        RideEntity rideEntity = rideRepository.findById(command.rideId())
-                .orElseThrow(() -> new RideNotFoundException(command.rideId()));
-
-        if (!rideEntity.getPassenger().getId().equals(passengerId)) {
-            throw new UnauthorizedException("You don't have access to cancel this ride");
-        }
-
-        String result = cancelRideCommandHandler.handle(command);
+        CancelRideResult result = cancelRideCommandHandler.handle(command, passengerId);
         return ResponseEntity.ok(result);
     }
 }
