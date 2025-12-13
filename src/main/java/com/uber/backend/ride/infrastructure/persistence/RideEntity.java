@@ -39,6 +39,9 @@ public class RideEntity {
     @Column(name = "requested_at", nullable = false)
     private LocalDateTime requestedAt;
 
+    @Column(name = "accepted_at")
+    private LocalDateTime acceptedAt;
+
     @Column(name = "started_at")
     private LocalDateTime startedAt;
 
@@ -47,6 +50,9 @@ public class RideEntity {
 
     @Column(name = "invited_at")
     private LocalDateTime invitedAt;
+
+    @Column(name = "cancelled_at")
+    private LocalDateTime cancelledAt;
 
     @Column(name = "distance_km")
     private Double distanceKm;

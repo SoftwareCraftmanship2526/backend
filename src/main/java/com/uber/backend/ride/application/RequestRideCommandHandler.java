@@ -62,8 +62,7 @@ public class RequestRideCommandHandler {
             rideEntity.getId(),
             passengerId,
             rideEntity.getStatus(),
-            rideEntity.getRequestedAt(),
-            null
+            rideEntity.getRequestedAt()
         );
 
 
