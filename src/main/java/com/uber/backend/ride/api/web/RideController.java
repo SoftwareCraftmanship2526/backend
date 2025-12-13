@@ -7,7 +7,8 @@ import com.uber.backend.ride.application.exception.UnauthorizedException;
 import com.uber.backend.ride.application.query.GetRideQuery;
 import com.uber.backend.ride.application.query.RideResult;
 import com.uber.backend.ride.infrastructure.repository.RideRepository;
-import com.uber.backend.shared.applicaition.CheckRoleService;
+import com.uber.backend.shared.application.CheckRoleService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;

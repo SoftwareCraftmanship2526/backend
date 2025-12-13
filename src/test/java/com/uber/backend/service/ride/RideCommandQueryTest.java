@@ -89,10 +89,8 @@ class RideCommandQueryTest {
 
             // Setup command
             command = new RequestRideCommand(
-                    "Pickup Address",
                     50.8503,
                     4.3517,
-                    "Dropoff Address",
                     50.8467,
                     4.3525,
                     RideType.UBER_X
@@ -142,9 +140,7 @@ class RideCommandQueryTest {
         void givenDifferentRideTypes_whenRequestingRide_thenRideTypeSet() {
             // Given - Test UBER_BLACK
             RequestRideCommand blackCommand = new RequestRideCommand(
-                    "Pickup",
                     50.8503, 4.3517,
-                    "Dropoff",
                     50.8467, 4.3525,
                     RideType.UBER_BLACK
             );
