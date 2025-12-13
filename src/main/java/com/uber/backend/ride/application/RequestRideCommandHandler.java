@@ -26,6 +26,7 @@ public class RequestRideCommandHandler {
         // Get ride type from command (already enum)
         RideType rideType = command.rideType();
 
+
         // Find passenger
         PassengerEntity passenger = passengerRepository.findById(passengerId)
                 .orElseThrow(() -> new IllegalArgumentException("Passenger not found: " + passengerId));

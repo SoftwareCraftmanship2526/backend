@@ -1,5 +1,6 @@
 package com.uber.backend.ride.application.query;
 
+import com.uber.backend.ride.domain.enums.RideType;
 import com.uber.backend.shared.domain.port.DistanceCalculatorPort;
 import com.uber.backend.ride.domain.strategy.PricingContext;
 import com.uber.backend.shared.domain.valueobject.Location;
@@ -19,12 +20,12 @@ public class RideQueryService {
         this.distanceCalculator = distanceCalculator;
     }
 
-    public Map<String, BigDecimal> priceRequest(Location start, Location end, int durationMin, double demandMultiplier) {
+    public Map<RideType, BigDecimal> priceRequest(Location start, Location end, int durationMin, double demandMultiplier) {
         double distanceKm = distanceCalculator.calculateDistance(start, end);
         return pricingContext.calculateAllFares(distanceKm, durationMin, demandMultiplier);
     }
 
-    public BigDecimal calculateFare(String type, Location start, Location end, int durationMin, double demandMultiplier) {
+    public BigDecimal calculateFare(RideType type, Location start, Location end, int durationMin, double demandMultiplier) {
         double distanceKm = distanceCalculator.calculateDistance(start, end);
         return pricingContext.calculateFare(type, distanceKm, durationMin, demandMultiplier);
     }
