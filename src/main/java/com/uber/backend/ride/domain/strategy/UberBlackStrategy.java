@@ -1,11 +1,12 @@
 package com.uber.backend.ride.domain.strategy;
 
+import com.uber.backend.ride.domain.enums.RideType;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
-@Component
+@Component("UberBlack")
 public class UberBlackStrategy implements PricingStrategy {
 
     private static final BigDecimal BASE_FARE = new BigDecimal("8.00");
@@ -32,5 +33,10 @@ public class UberBlackStrategy implements PricingStrategy {
         }
 
         return totalFare.setScale(2, RoundingMode.HALF_UP);
+    }
+
+    @Override
+    public RideType getRideType() {
+        return RideType.UBER_BLACK;
     }
 }
