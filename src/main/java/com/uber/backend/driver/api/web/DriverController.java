@@ -1,12 +1,12 @@
 package com.uber.backend.driver.api.web;
 
 import com.uber.backend.auth.infrastructure.security.JwtUtil;
-import com.uber.backend.driver.application.command.GoOfflineCommand;
 import com.uber.backend.driver.application.command.GoOnlineCommand;
 import com.uber.backend.driver.application.command.UpdateLocationCommand;
 import com.uber.backend.driver.application.service.DriverAvailabilityService;
-import com.uber.backend.shared.applicaition.CheckRoleService;
 import com.uber.backend.ride.application.exception.UnauthorizedException;
+import com.uber.backend.shared.application.CheckRoleService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,8 +38,8 @@ public class DriverController {
             throw new UnauthorizedException("Only drivers can go online. Please log in as a driver.");
         }
         
-        driverAvailabilityService.goOnline(driverId, command.latitude(), command.longitude());
-        return ResponseEntity.ok("Driver is now online and available for rides");
+        String address = driverAvailabilityService.goOnline(driverId, command.latitude(), command.longitude());
+        return ResponseEntity.ok("Driver is now online and available for rides at " + address);
     }
 
     @PostMapping("/go-offline")
@@ -62,7 +62,7 @@ public class DriverController {
             throw new UnauthorizedException("Only drivers can update location. Please log in as a driver.");
         }
         
-        driverAvailabilityService.updateLocation(driverId, command.latitude(), command.longitude());
-        return ResponseEntity.ok("Location updated successfully");
+        String address = driverAvailabilityService.updateLocation(driverId, command.latitude(), command.longitude());
+        return ResponseEntity.ok("Location updated to " + address);
     }
 }
