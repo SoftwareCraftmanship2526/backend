@@ -18,6 +18,7 @@ import com.uber.backend.ride.domain.enums.RideStatus;
 import com.uber.backend.ride.domain.enums.RideType;
 import com.uber.backend.ride.infrastructure.persistence.RideEntity;
 import com.uber.backend.ride.infrastructure.repository.RideRepository;
+import com.uber.backend.shared.domain.port.GeocodingPort;
 import com.uber.backend.shared.domain.valueobject.Location;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -57,6 +58,9 @@ class RideCommandQueryTest {
     @Mock
     private CalculateFareQueryHandler calculateFareQueryHandler;
 
+    @Mock
+    private GeocodingPort geocodingPort;
+
     @InjectMocks
     private RequestRideCommandHandler requestRideHandler;
 
@@ -86,6 +90,10 @@ class RideCommandQueryTest {
             // Setup passenger
             passenger = new PassengerEntity();
             passenger.setId(1L);
+
+            // Mock geocoding service to return test addresses (lenient because not all tests use it)
+            lenient().when(geocodingPort.getAddressFromCoordinates(anyDouble(), anyDouble()))
+                    .thenReturn("Test Address");
 
             // Setup command
             command = new RequestRideCommand(
