@@ -40,5 +40,5 @@ public class UberPoolStrategy implements PricingStrategy {
     @Override
     public RideType getRideType() {
         return RideType.UBER_POOL;
-    }
+    } 
 }
