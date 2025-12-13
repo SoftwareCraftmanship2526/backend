@@ -1,4 +1,4 @@
-package com.uber.backend.shared.api.seed;
+package com.uber.backend.shared.application;
 
 import com.uber.backend.auth.domain.enums.Role;
 import com.uber.backend.shared.domain.valueobject.Location;
@@ -89,7 +89,7 @@ public class DataSeederService {
         PassengerEntity passenger1 = new PassengerEntity();
         passenger1.setFirstName("John");
         passenger1.setLastName("Doe");
-        passenger1.setEmail("john.passenger@example.com");
+        passenger1.setEmail("john.doe@gmail.com");
         passenger1.setPassword(encodedPassword);
         passenger1.setPhoneNumber("+1-555-0101");
         passenger1.setRole(Role.PASSENGER);
@@ -103,7 +103,7 @@ public class DataSeederService {
         PassengerEntity passenger2 = new PassengerEntity();
         passenger2.setFirstName("Sarah");
         passenger2.setLastName("Johnson");
-        passenger2.setEmail("sarah.passenger@example.com");
+        passenger2.setEmail("sarah.johnson@gmail.com");
         passenger2.setPassword(encodedPassword);
         passenger2.setPhoneNumber("+1-555-0102");
         passenger2.setRole(Role.PASSENGER);
@@ -116,7 +116,7 @@ public class DataSeederService {
         PassengerEntity passenger3 = new PassengerEntity();
         passenger3.setFirstName("Michael");
         passenger3.setLastName("Chen");
-        passenger3.setEmail("michael.passenger@example.com");
+        passenger3.setEmail("michael.chen@gmail.com");
         passenger3.setPassword(encodedPassword);
         passenger3.setPhoneNumber("+1-555-0103");
         passenger3.setRole(Role.PASSENGER);
@@ -136,7 +136,7 @@ public class DataSeederService {
         DriverEntity driver1 = new DriverEntity();
         driver1.setFirstName("Robert");
         driver1.setLastName("Smith");
-        driver1.setEmail("robert.driver@example.com");
+        driver1.setEmail("robert.smith@gmail.com");
         driver1.setPassword(encodedPassword);
         driver1.setPhoneNumber("+1-555-0201");
         driver1.setRole(Role.DRIVER);
@@ -149,7 +149,7 @@ public class DataSeederService {
         DriverEntity driver2 = new DriverEntity();
         driver2.setFirstName("Emily");
         driver2.setLastName("Davis");
-        driver2.setEmail("emily.driver@example.com");
+        driver2.setEmail("emily.davis@gmail.com");
         driver2.setPassword(encodedPassword);
         driver2.setPhoneNumber("+1-555-0202");
         driver2.setRole(Role.DRIVER);
@@ -162,7 +162,7 @@ public class DataSeederService {
         DriverEntity driver3 = new DriverEntity();
         driver3.setFirstName("James");
         driver3.setLastName("Wilson");
-        driver3.setEmail("james.driver@example.com");
+        driver3.setEmail("james.wilson@gmail.com");
         driver3.setPassword(encodedPassword);
         driver3.setPhoneNumber("+1-555-0203");
         driver3.setRole(Role.DRIVER);
@@ -204,10 +204,13 @@ public class DataSeederService {
         // Completed Ride 1
         RideEntity ride1 = new RideEntity();
         ride1.setStatus(RideStatus.COMPLETED);
+        ride1.setRideType(com.uber.backend.ride.domain.enums.RideType.UBER_X);
         ride1.setRequestedAt(LocalDateTime.now().minusDays(2));
         ride1.setStartedAt(LocalDateTime.now().minusDays(2).plusMinutes(5));
         ride1.setCompletedAt(LocalDateTime.now().minusDays(2).plusMinutes(25));
-        ride1.setFareAmount(new BigDecimal("18.50"));
+        ride1.setDistanceKm(8.5);
+        ride1.setDurationMin(20);
+        ride1.setDemandMultiplier(1.0);
         ride1.setPickupLocation(new Location(40.7128, -74.0060, "123 Oak Street, New York, NY 10001"));
         ride1.setDropoffLocation(new Location(40.7589, -73.9851, "456 Corporate Plaza, New York, NY 10005"));
         ride1.setPassenger(passengers.get(0));
@@ -217,9 +220,9 @@ public class DataSeederService {
         // In Progress Ride 2
         RideEntity ride2 = new RideEntity();
         ride2.setStatus(RideStatus.IN_PROGRESS);
+        ride2.setRideType(com.uber.backend.ride.domain.enums.RideType.UBER_BLACK);
         ride2.setRequestedAt(LocalDateTime.now().minusMinutes(15));
         ride2.setStartedAt(LocalDateTime.now().minusMinutes(10));
-        ride2.setFareAmount(new BigDecimal("35.00"));
         ride2.setPickupLocation(new Location(40.7589, -73.9851, "789 Elm Avenue, Brooklyn, NY 11201"));
         ride2.setDropoffLocation(new Location(40.7580, -73.9855, "JFK Airport, Queens, NY"));
         ride2.setPassenger(passengers.get(1));
@@ -229,6 +232,7 @@ public class DataSeederService {
         // Requested Ride 3
         RideEntity ride3 = new RideEntity();
         ride3.setStatus(RideStatus.REQUESTED);
+        ride3.setRideType(com.uber.backend.ride.domain.enums.RideType.UBER_POOL);
         ride3.setRequestedAt(LocalDateTime.now().minusMinutes(2));
         ride3.setPickupLocation(new Location(40.7580, -73.9855, "321 Pine Road, Queens, NY 11354"));
         ride3.setDropoffLocation(new Location(40.7128, -74.0060, "555 Fitness Street, Queens, NY 11355"));
@@ -237,10 +241,13 @@ public class DataSeederService {
         // Completed Ride 4
         RideEntity ride4 = new RideEntity();
         ride4.setStatus(RideStatus.COMPLETED);
+        ride4.setRideType(com.uber.backend.ride.domain.enums.RideType.UBER_X);
         ride4.setRequestedAt(LocalDateTime.now().minusDays(5));
         ride4.setStartedAt(LocalDateTime.now().minusDays(5).plusMinutes(3));
         ride4.setCompletedAt(LocalDateTime.now().minusDays(5).plusMinutes(18));
-        ride4.setFareAmount(new BigDecimal("22.75"));
+        ride4.setDistanceKm(12.0);
+        ride4.setDurationMin(15);
+        ride4.setDemandMultiplier(1.0);
         ride4.setPickupLocation(new Location(40.7128, -74.0060, "Central Park West, New York, NY"));
         ride4.setDropoffLocation(new Location(40.7589, -73.9851, "Brooklyn Bridge, Brooklyn, NY"));
         ride4.setPassenger(passengers.get(0));
@@ -253,7 +260,7 @@ public class DataSeederService {
     private void createPayments(List<RideEntity> rides) {
         // Payment for completed ride 1
         PaymentEntity payment1 = new PaymentEntity();
-        payment1.setAmount(rides.get(0).getFareAmount());
+        payment1.setAmount(new BigDecimal("18.50"));
         payment1.setMethod(PaymentMethod.CREDIT_CARD);
         payment1.setStatus(PaymentStatus.COMPLETED);
         payment1.setTransactionId("TXN-" + System.currentTimeMillis() + "-001");
@@ -261,7 +268,7 @@ public class DataSeederService {
 
         // Payment for in-progress ride 2
         PaymentEntity payment2 = new PaymentEntity();
-        payment2.setAmount(rides.get(1).getFareAmount());
+        payment2.setAmount(new BigDecimal("35.00"));
         payment2.setMethod(PaymentMethod.APPLE_PAY);
         payment2.setStatus(PaymentStatus.PENDING);
         payment2.setTransactionId("TXN-" + System.currentTimeMillis() + "-002");
@@ -269,7 +276,7 @@ public class DataSeederService {
 
         // Payment for completed ride 4
         PaymentEntity payment4 = new PaymentEntity();
-        payment4.setAmount(rides.get(3).getFareAmount());
+        payment4.setAmount(new BigDecimal("22.75"));
         payment4.setMethod(PaymentMethod.CASH);
         payment4.setStatus(PaymentStatus.COMPLETED);
         payment4.setTransactionId("TXN-" + System.currentTimeMillis() + "-004");

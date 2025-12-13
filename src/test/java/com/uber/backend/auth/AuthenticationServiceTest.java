@@ -1,4 +1,4 @@
-package com.uber.backend.auth.application;
+package com.uber.backend.auth;
 
 import com.uber.backend.auth.application.dto.AuthResponse;
 import com.uber.backend.auth.application.dto.LoginRequest;

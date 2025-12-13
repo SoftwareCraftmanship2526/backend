@@ -1,4 +1,4 @@
-package com.uber.backend.auth.application;
+package com.uber.backend.auth;
 
 import com.uber.backend.auth.application.service.EmailService;
 import org.junit.jupiter.api.BeforeEach;

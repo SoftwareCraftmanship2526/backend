@@ -9,13 +9,15 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.uber.backend.ride.application.exception.UnauthorizedException;
+
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Global exception handler for authentication-related errors.
- * Provides consistent error responses across the application.
+ * Exception handler for authentication-related errors only.
+ * General application errors are handled in shared.api.exception.GlobalExceptionHandler.
  */
 @RestControllerAdvice
 public class AuthExceptionHandler {
@@ -27,18 +29,18 @@ public class AuthExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
         
-        Map<String, String> errors = new HashMap<>();
+        Map<String, String> errors = new LinkedHashMap<>();
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
+        Map<String, Object> response = new LinkedHashMap<>();
         response.put("error", "Validation Failed");
         response.put("errors", errors);
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.BAD_REQUEST.value());
 
         return ResponseEntity.badRequest().body(response);
     }
@@ -48,48 +50,27 @@ public class AuthExceptionHandler {
      */
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<Map<String, Object>> handleBadCredentials(BadCredentialsException ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.UNAUTHORIZED.value());
+        Map<String, Object> response = new LinkedHashMap<>();
         response.put("error", "Authentication Failed");
         response.put("message", "Invalid email or password");
+        response.put("timestamp", LocalDateTime.now());
+        response.put("status", HttpStatus.UNAUTHORIZED.value());
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
     /**
-     * Handle illegal argument exceptions (e.g., email already exists).
+     * Handle unauthorized exceptions (role-based access control).
      */
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException ex) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.BAD_REQUEST.value());
-        response.put("error", "Bad Request");
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<Map<String, Object>> handleUnauthorized(
+            com.uber.backend.ride.application.exception.UnauthorizedException ex) {
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("error", "Unauthorized");
         response.put("message", ex.getMessage());
-
-        return ResponseEntity.badRequest().body(response);
-    }
-
-    /**
-     * Handle general exceptions.
-     */
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, Object>> handleGeneralException(Exception ex) {
-
-        // ⭐ If exception has @ResponseStatus, rethrow it so Spring handles it properly
-        ResponseStatus responseStatus = ex.getClass().getAnnotation(ResponseStatus.class);
-        if (responseStatus != null) {
-            throw new RuntimeException(ex);
-        }
-
-        Map<String, Object> response = new HashMap<>();
         response.put("timestamp", LocalDateTime.now());
-        response.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        response.put("error", "Internal Server Error");
-        response.put("message", "An unexpected error occurred");
+        response.put("status", HttpStatus.UNAUTHORIZED.value());
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
-
 }

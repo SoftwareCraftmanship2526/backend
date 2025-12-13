@@ -20,7 +20,7 @@ public class RideMapper {
                 .requestedAt(entity.getRequestedAt())
                 .startedAt(entity.getStartedAt())
                 .completedAt(entity.getCompletedAt())
-                .fareAmount(entity.getFareAmount())
+                .fareAmount(entity.getPayment() != null ? entity.getPayment().getAmount() : null)
                 .pickupLocation(entity.getPickupLocation())
                 .dropoffLocation(entity.getDropoffLocation())
                 .passengerId(entity.getPassenger() != null ? entity.getPassenger().getId() : null)
@@ -44,7 +44,7 @@ public class RideMapper {
         entity.setRequestedAt(domain.getRequestedAt());
         entity.setStartedAt(domain.getStartedAt());
         entity.setCompletedAt(domain.getCompletedAt());
-        entity.setFareAmount(domain.getFareAmount());
+        // fareAmount is stored in PaymentEntity, not RideEntity
         entity.setPickupLocation(domain.getPickupLocation());
         entity.setDropoffLocation(domain.getDropoffLocation());
         return entity;
@@ -59,7 +59,6 @@ public class RideMapper {
         entity.setRequestedAt(domain.getRequestedAt());
         entity.setStartedAt(domain.getStartedAt());
         entity.setCompletedAt(domain.getCompletedAt());
-        entity.setFareAmount(domain.getFareAmount());
         entity.setPickupLocation(domain.getPickupLocation());
         entity.setDropoffLocation(domain.getDropoffLocation());
     }

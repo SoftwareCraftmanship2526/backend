@@ -54,7 +54,7 @@ public class DriverAssignCommandHandler {
 
         rideRepository.save(rideEntity);
         driverRepository.save(driverEntity);
-        return new RideAssignResult(rideEntity.getId(), passengerId, rideEntity.getStatus(), rideEntity.getRequestedAt(), rideEntity.getFareAmount(), driver, vehicle, rideEntity.getStartedAt());
+        return new RideAssignResult(rideEntity.getId(), passengerId, rideEntity.getStatus(), rideEntity.getRequestedAt(), driver, vehicle, rideEntity.getStartedAt());
 
     }
 }

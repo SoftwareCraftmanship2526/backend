@@ -4,16 +4,14 @@ import com.uber.backend.passenger.infrastructure.persistence.PassengerEntity;
 import com.uber.backend.passenger.infrastructure.repository.PassengerRepository;
 import com.uber.backend.ride.application.command.RequestRideCommand;
 import com.uber.backend.ride.application.command.RideRequestResult;
-import com.uber.backend.ride.application.query.RideQueryService;
 import com.uber.backend.ride.domain.enums.RideStatus;
-import com.uber.backend.ride.domain.model.Ride;
+import com.uber.backend.ride.domain.enums.RideType;
 import com.uber.backend.ride.infrastructure.persistence.RideEntity;
-import com.uber.backend.ride.infrastructure.persistence.RideMapper;
 import com.uber.backend.ride.infrastructure.repository.RideRepository;
+import com.uber.backend.shared.domain.valueobject.Location;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Service
@@ -22,24 +20,51 @@ public class RequestRideCommandHandler {
 
     private final RideRepository rideRepository;
     private final PassengerRepository passengerRepository;
-    private final RideQueryService rideQueryService;
-    private final RideMapper rideMapper;
 
     public RideRequestResult handle(RequestRideCommand command, Long passengerId) {
 
-        BigDecimal fare = rideQueryService.calculateFare(command.type(), command.start(), command.end(), command.durationMin(), command.demandMultiplier()) ;
-        Ride ride = Ride.builder().status(RideStatus.REQUESTED).requestedAt(LocalDateTime.now()).fareAmount(fare).pickupLocation(command.start()).dropoffLocation(command.end()).passengerId(passengerId).build();
-        RideEntity rideEntity = rideMapper.toEntity(ride);
-        PassengerEntity passengerEntity = passengerRepository.findById(passengerId).orElse(null);
-        rideEntity.setPassenger(passengerEntity);
+        // Get ride type from command (already enum)
+        RideType rideType = command.rideType();
 
-        rideRepository.save(rideEntity);
 
-        Long rideId = rideEntity.getId();
-        RideStatus status = rideEntity.getStatus();
-        LocalDateTime requestedAt = rideEntity.getRequestedAt();
+        // Find passenger
+        PassengerEntity passenger = passengerRepository.findById(passengerId)
+                .orElseThrow(() -> new IllegalArgumentException("Passenger not found: " + passengerId));
 
-        return new RideRequestResult(rideId, passengerId, status, requestedAt, fare);
+        // Create pickup location
+        Location pickupLocation = new Location(
+            command.pickupLatitude(),
+            command.pickupLongitude(),
+            command.pickupAddress()
+        );
+
+        // Create dropoff location
+        Location dropoffLocation = new Location(
+            command.dropoffLatitude(),
+            command.dropoffLongitude(),
+            command.dropoffAddress()
+        );
+
+        // Create ride entity
+        RideEntity rideEntity = new RideEntity();
+        rideEntity.setStatus(RideStatus.REQUESTED);
+        rideEntity.setRequestedAt(LocalDateTime.now());
+        rideEntity.setPickupLocation(pickupLocation);
+        rideEntity.setDropoffLocation(dropoffLocation);
+        rideEntity.setPassenger(passenger);
+        rideEntity.setRideType(rideType);
+
+        // Save ride entity
+        rideEntity = rideRepository.save(rideEntity);
+
+        // Return result (price is null at request time, calculated when ride completes)
+        return new RideRequestResult(
+            rideEntity.getId(),
+            passengerId,
+            rideEntity.getStatus(),
+            rideEntity.getRequestedAt(),
+            null
+        );
 
 
     }
