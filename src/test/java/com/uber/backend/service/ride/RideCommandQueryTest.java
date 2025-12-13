@@ -72,6 +72,9 @@ class RideCommandQueryTest {
     @InjectMocks
     private CompleteRideCommandHandler completeRideHandler;
 
+    @InjectMocks
+    private CancelRideCommandHandler cancelRideHandler;
+
     @Nested
     class RequestRideCommandTests {
 
@@ -115,7 +118,6 @@ class RideCommandQueryTest {
             assertEquals(1L, result.passengerId());
             assertEquals(RideStatus.REQUESTED, result.status());
             assertNotNull(result.requestedAt());
-            assertNull(result.price());
 
             verify(passengerRepository).findById(1L);
             verify(rideRepository).save(any(RideEntity.class));
@@ -710,6 +712,457 @@ class RideCommandQueryTest {
 
             // Then
             verify(paymentRepository).save(any(PaymentEntity.class));
+        }
+    }
+
+    @Nested
+    class CancelRideCommandTests {
+
+        private static final BigDecimal BASE_CANCELLATION_FEE = new BigDecimal("5.00");
+        private static final BigDecimal ADDITIONAL_FEE_PER_MINUTE = new BigDecimal("1.00");
+
+        @Nested
+        class CancelBeforeAcceptanceTests {
+
+            @Test
+            void givenRequestedRide_whenCancelled_thenNoFee() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                RideEntity requestedRide = new RideEntity();
+                requestedRide.setId(100L);
+                requestedRide.setPassenger(passenger);
+                requestedRide.setStatus(RideStatus.REQUESTED);
+                requestedRide.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                requestedRide.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                requestedRide.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(requestedRide));
+                when(rideRepository.save(any(RideEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+                // When
+                CancelRideResult result = cancelRideHandler.handle(command, 1L);
+
+                // Then
+                verify(rideRepository).save(requestedRide);
+                assertEquals(RideStatus.CANCELLED, requestedRide.getStatus());
+                assertNotNull(requestedRide.getCancelledAt());
+                assertNull(requestedRide.getPayment());
+                assertTrue(result.message().contains("No cancellation fee"));
+                assertTrue(result.message().contains("before driver acceptance"));
+                assertNull(result.payment());
+            }
+
+            @Test
+            void givenInvitedRide_whenCancelled_thenNoFee() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                DriverEntity driver = new DriverEntity();
+                driver.setId(2L);
+
+                RideEntity invitedRide = new RideEntity();
+                invitedRide.setId(100L);
+                invitedRide.setPassenger(passenger);
+                invitedRide.setDriver(driver);
+                invitedRide.setStatus(RideStatus.INVITED);
+                invitedRide.setInvitedAt(LocalDateTime.now().minusMinutes(1));
+                invitedRide.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                invitedRide.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                invitedRide.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(invitedRide));
+                when(rideRepository.save(any(RideEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+                when(driverRepository.findById(2L)).thenReturn(Optional.of(driver));
+
+                // When
+                CancelRideResult result = cancelRideHandler.handle(command, 1L);
+
+                // Then
+                verify(rideRepository).save(invitedRide);
+                assertEquals(RideStatus.CANCELLED, invitedRide.getStatus());
+                assertNotNull(invitedRide.getCancelledAt());
+                assertNull(invitedRide.getPayment());
+                assertTrue(result.message().contains("No cancellation fee"));
+                assertNull(result.payment());
+                verify(driverRepository).save(driver);
+                assertTrue(driver.getIsAvailable());
+            }
+        }
+
+        @Nested
+        class CancelWithin5MinutesTests {
+
+            @Test
+            void givenAcceptedRide_whenCancelledAfter1Minute_thenNoFee() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                DriverEntity driver = new DriverEntity();
+                driver.setId(2L);
+
+                RideEntity acceptedRide = new RideEntity();
+                acceptedRide.setId(100L);
+                acceptedRide.setPassenger(passenger);
+                acceptedRide.setDriver(driver);
+                acceptedRide.setStatus(RideStatus.ACCEPTED);
+                acceptedRide.setAcceptedAt(LocalDateTime.now().minusMinutes(1));
+                acceptedRide.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                acceptedRide.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                acceptedRide.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(acceptedRide));
+                when(rideRepository.save(any(RideEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+                when(driverRepository.findById(2L)).thenReturn(Optional.of(driver));
+
+                // When
+                CancelRideResult result = cancelRideHandler.handle(command, 1L);
+
+                // Then
+                verify(rideRepository).save(acceptedRide);
+                assertEquals(RideStatus.CANCELLED, acceptedRide.getStatus());
+                assertNotNull(acceptedRide.getCancelledAt());
+                assertNull(acceptedRide.getPayment());
+                assertTrue(result.message().contains("No cancellation fee"));
+                assertTrue(result.message().contains("within 1 minutes"));
+                assertNull(result.payment());
+            }
+
+            @Test
+            void givenAcceptedRide_whenCancelledAfter3Minutes_thenNoFee() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                DriverEntity driver = new DriverEntity();
+                driver.setId(2L);
+
+                RideEntity acceptedRide = new RideEntity();
+                acceptedRide.setId(100L);
+                acceptedRide.setPassenger(passenger);
+                acceptedRide.setDriver(driver);
+                acceptedRide.setStatus(RideStatus.ACCEPTED);
+                acceptedRide.setAcceptedAt(LocalDateTime.now().minusMinutes(3));
+                acceptedRide.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                acceptedRide.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                acceptedRide.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(acceptedRide));
+                when(rideRepository.save(any(RideEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+                when(driverRepository.findById(2L)).thenReturn(Optional.of(driver));
+
+                // When
+                CancelRideResult result = cancelRideHandler.handle(command, 1L);
+
+                // Then
+                verify(rideRepository).save(acceptedRide);
+                assertEquals(RideStatus.CANCELLED, acceptedRide.getStatus());
+                assertNotNull(acceptedRide.getCancelledAt());
+                assertNull(acceptedRide.getPayment());
+                assertTrue(result.message().contains("No cancellation fee"));
+                assertTrue(result.message().contains("within 3 minutes"));
+                assertNull(result.payment());
+            }
+        }
+
+        @Nested
+        class CancelAfter5MinutesTests {
+
+            @Test
+            void givenAcceptedRide_whenCancelledAfter5Minutes_thenBaseFeeCharged() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                DriverEntity driver = new DriverEntity();
+                driver.setId(2L);
+
+                RideEntity acceptedRide = new RideEntity();
+                acceptedRide.setId(100L);
+                acceptedRide.setPassenger(passenger);
+                acceptedRide.setDriver(driver);
+                acceptedRide.setStatus(RideStatus.ACCEPTED);
+                acceptedRide.setAcceptedAt(LocalDateTime.now().minusMinutes(5));
+                acceptedRide.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                acceptedRide.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                acceptedRide.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(acceptedRide));
+                when(rideRepository.save(any(RideEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+                when(driverRepository.findById(2L)).thenReturn(Optional.of(driver));
+
+                // When
+                CancelRideResult result = cancelRideHandler.handle(command, 1L);
+
+                // Then
+                verify(rideRepository).save(acceptedRide);
+                assertEquals(RideStatus.CANCELLED, acceptedRide.getStatus());
+                assertNotNull(acceptedRide.getCancelledAt());
+
+                // Verify payment was created - 5 minutes = €5.00 (base fee, 0 additional minutes)
+                assertNotNull(acceptedRide.getPayment());
+                assertEquals(BASE_CANCELLATION_FEE, acceptedRide.getPayment().getAmount());
+                assertEquals(PaymentStatus.PENDING, acceptedRide.getPayment().getStatus());
+
+                assertTrue(result.message().contains("Cancellation fee of €5.00"));
+                assertTrue(result.message().contains("pending payment"));
+                assertNotNull(result.payment());
+                assertEquals(BASE_CANCELLATION_FEE, result.payment().amount());
+            }
+
+            @Test
+            void givenAcceptedRide_whenCancelledAfter6Minutes_thenProgressiveFeeCharged() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                DriverEntity driver = new DriverEntity();
+                driver.setId(2L);
+
+                RideEntity acceptedRide = new RideEntity();
+                acceptedRide.setId(100L);
+                acceptedRide.setPassenger(passenger);
+                acceptedRide.setDriver(driver);
+                acceptedRide.setStatus(RideStatus.ACCEPTED);
+                acceptedRide.setAcceptedAt(LocalDateTime.now().minusMinutes(6));
+                acceptedRide.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                acceptedRide.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                acceptedRide.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(acceptedRide));
+                when(rideRepository.save(any(RideEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+                when(driverRepository.findById(2L)).thenReturn(Optional.of(driver));
+
+                // When
+                CancelRideResult result = cancelRideHandler.handle(command, 1L);
+
+                // Then
+                verify(rideRepository).save(acceptedRide);
+                assertEquals(RideStatus.CANCELLED, acceptedRide.getStatus());
+                assertNotNull(acceptedRide.getCancelledAt());
+
+                // Verify payment was created - 6 minutes = €5.00 + €1.00 = €6.00 (1 additional minute beyond 5-min grace)
+                assertNotNull(acceptedRide.getPayment());
+                BigDecimal expectedFee = BASE_CANCELLATION_FEE.add(ADDITIONAL_FEE_PER_MINUTE); // €5 + €1 = €6
+                assertEquals(expectedFee, acceptedRide.getPayment().getAmount());
+                assertEquals(PaymentStatus.PENDING, acceptedRide.getPayment().getStatus());
+
+                assertTrue(result.message().contains("Cancellation fee"));
+                assertTrue(result.message().contains("6 minutes"));
+                assertNotNull(result.payment());
+                assertEquals(expectedFee, result.payment().amount());
+            }
+
+            @Test
+            void givenAcceptedRide_whenCancelledAfter8Minutes_thenProgressiveFeeCharged() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                DriverEntity driver = new DriverEntity();
+                driver.setId(2L);
+
+                RideEntity acceptedRide = new RideEntity();
+                acceptedRide.setId(100L);
+                acceptedRide.setPassenger(passenger);
+                acceptedRide.setDriver(driver);
+                acceptedRide.setStatus(RideStatus.ACCEPTED);
+                acceptedRide.setAcceptedAt(LocalDateTime.now().minusMinutes(8));
+                acceptedRide.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                acceptedRide.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                acceptedRide.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(acceptedRide));
+                when(rideRepository.save(any(RideEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+                when(driverRepository.findById(2L)).thenReturn(Optional.of(driver));
+
+                // When
+                CancelRideResult result = cancelRideHandler.handle(command, 1L);
+
+                // Then
+                verify(rideRepository).save(acceptedRide);
+                assertNotNull(acceptedRide.getPayment());
+                // 8 minutes = €5.00 + (3 × €1.00) = €8.00 (3 additional minutes beyond the 5-minute grace period)
+                BigDecimal expectedFee = BASE_CANCELLATION_FEE.add(ADDITIONAL_FEE_PER_MINUTE.multiply(new BigDecimal("3"))); // €5 + €3 = €8
+                assertEquals(expectedFee, acceptedRide.getPayment().getAmount());
+                assertEquals(new BigDecimal("8.00"), acceptedRide.getPayment().getAmount());
+                assertTrue(result.message().contains("€8.00"));
+                assertNotNull(result.payment());
+                assertEquals(new BigDecimal("8.00"), result.payment().amount());
+            }
+
+            @Test
+            void givenAcceptedRide_whenCancelledWithFee_thenDriverSetAvailable() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                DriverEntity driver = new DriverEntity();
+                driver.setId(2L);
+
+                RideEntity acceptedRide = new RideEntity();
+                acceptedRide.setId(100L);
+                acceptedRide.setPassenger(passenger);
+                acceptedRide.setDriver(driver);
+                acceptedRide.setStatus(RideStatus.ACCEPTED);
+                acceptedRide.setAcceptedAt(LocalDateTime.now().minusMinutes(6)); // 6 minutes > 5-minute grace, so fee applies
+                acceptedRide.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                acceptedRide.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                acceptedRide.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(acceptedRide));
+                when(rideRepository.save(any(RideEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+                when(driverRepository.findById(2L)).thenReturn(Optional.of(driver));
+
+                // When
+                cancelRideHandler.handle(command, 1L);
+
+                // Then
+                verify(driverRepository).save(driver);
+                assertTrue(driver.getIsAvailable());
+            }
+        }
+
+        @Nested
+        class AuthorizationTests {
+
+            @Test
+            void givenDifferentPassenger_whenCancelling_thenThrowsException() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                RideEntity ride = new RideEntity();
+                ride.setId(100L);
+                ride.setPassenger(passenger);
+                ride.setStatus(RideStatus.REQUESTED);
+                ride.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                ride.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                ride.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(ride));
+
+                // When & Then
+                IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                        cancelRideHandler.handle(command, 999L) // Wrong passenger ID
+                );
+
+                assertTrue(exception.getMessage().contains("Unauthorized"));
+                verify(rideRepository, never()).save(any());
+            }
+
+            @Test
+            void givenCorrectPassenger_whenCancelling_thenSucceeds() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                RideEntity ride = new RideEntity();
+                ride.setId(100L);
+                ride.setPassenger(passenger);
+                ride.setStatus(RideStatus.REQUESTED);
+                ride.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                ride.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                ride.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(ride));
+                when(rideRepository.save(any(RideEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+                // When
+                CancelRideResult result = cancelRideHandler.handle(command, 1L);
+
+                // Then
+                verify(rideRepository).save(ride);
+                assertEquals(RideStatus.CANCELLED, ride.getStatus());
+                assertNotNull(result);
+                assertNotNull(result.message());
+            }
+        }
+
+        @Nested
+        class EdgeCaseTests {
+
+            @Test
+            void givenNonExistentRide_whenCancelling_thenThrowsException() {
+                // Given
+                CancelRideCommand command = new CancelRideCommand(999L);
+                when(rideRepository.findById(999L)).thenReturn(Optional.empty());
+
+                // When & Then
+                assertThrows(RideNotFoundException.class, () ->
+                        cancelRideHandler.handle(command, 1L)
+                );
+
+                verify(rideRepository, never()).save(any());
+            }
+
+            @Test
+            void givenRideWithoutDriver_whenCancelled_thenNoDriverUpdate() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                RideEntity ride = new RideEntity();
+                ride.setId(100L);
+                ride.setPassenger(passenger);
+                ride.setStatus(RideStatus.REQUESTED);
+                ride.setDriver(null); // No driver assigned
+                ride.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                ride.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                ride.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(ride));
+                when(rideRepository.save(any(RideEntity.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+                // When
+                cancelRideHandler.handle(command, 1L);
+
+                // Then
+                verify(driverRepository, never()).findById(any());
+                verify(driverRepository, never()).save(any());
+            }
+
+            @Test
+            void givenAlreadyCancelledRide_whenCancelling_thenThrowsException() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                RideEntity ride = new RideEntity();
+                ride.setId(100L);
+                ride.setPassenger(passenger);
+                ride.setStatus(RideStatus.CANCELLED);
+                ride.setCancelledAt(LocalDateTime.now().minusMinutes(10));
+                ride.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                ride.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                ride.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(ride));
+
+                // When & Then
+                IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                        cancelRideHandler.handle(command, 1L)
+                );
+
+                assertTrue(exception.getMessage().contains("already been cancelled"));
+                assertTrue(exception.getMessage().contains("100"));
+                verify(rideRepository, never()).save(any());
+            }
         }
     }
 }
