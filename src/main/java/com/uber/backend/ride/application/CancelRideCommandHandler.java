@@ -49,6 +49,13 @@ public class CancelRideCommandHandler {
             throw new IllegalArgumentException("Cannot cancel ride " + command.rideId() + ": This ride has already been cancelled");
         }
 
+        // Check if ride can be cancelled (only REQUESTED, INVITED, or ACCEPTED status allowed)
+        if (rideEntity.getStatus() != RideStatus.REQUESTED && 
+            rideEntity.getStatus() != RideStatus.INVITED && 
+            rideEntity.getStatus() != RideStatus.ACCEPTED) {
+            throw new IllegalArgumentException("Cannot cancel ride " + command.rideId() + ": Ride is already " + rideEntity.getStatus() + ". Only rides with REQUESTED, INVITED, or ACCEPTED status can be cancelled");
+        }
+
         PaymentEntity paymentEntity = null;
         String message;
 

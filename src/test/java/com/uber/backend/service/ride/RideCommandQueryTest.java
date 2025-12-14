@@ -1172,6 +1172,73 @@ class RideCommandQueryTest {
                 assertTrue(exception.getMessage().contains("100"));
                 verify(rideRepository, never()).save(any());
             }
+
+            @Test
+            void givenInProgressRide_whenCancelling_thenThrowsException() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                DriverEntity driver = new DriverEntity();
+                driver.setId(2L);
+
+                RideEntity ride = new RideEntity();
+                ride.setId(100L);
+                ride.setPassenger(passenger);
+                ride.setDriver(driver);
+                ride.setStatus(RideStatus.IN_PROGRESS);
+                ride.setStartedAt(LocalDateTime.now().minusMinutes(5));
+                ride.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                ride.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                ride.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(ride));
+
+                // When & Then
+                IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                        cancelRideHandler.handle(command, 1L)
+                );
+
+                assertTrue(exception.getMessage().contains("Cannot cancel ride"));
+                assertTrue(exception.getMessage().contains("IN_PROGRESS"));
+                assertTrue(exception.getMessage().contains("Only rides with REQUESTED, INVITED, or ACCEPTED status can be cancelled"));
+                verify(rideRepository, never()).save(any());
+            }
+
+            @Test
+            void givenCompletedRide_whenCancelling_thenThrowsException() {
+                // Given
+                PassengerEntity passenger = new PassengerEntity();
+                passenger.setId(1L);
+
+                DriverEntity driver = new DriverEntity();
+                driver.setId(2L);
+
+                RideEntity ride = new RideEntity();
+                ride.setId(100L);
+                ride.setPassenger(passenger);
+                ride.setDriver(driver);
+                ride.setStatus(RideStatus.COMPLETED);
+                ride.setCompletedAt(LocalDateTime.now().minusMinutes(10));
+                ride.setPickupLocation(new Location(50.8500, 4.3520, "Pickup"));
+                ride.setDropoffLocation(new Location(50.8467, 4.3525, "Dropoff"));
+                ride.setRideType(RideType.UBER_X);
+
+                CancelRideCommand command = new CancelRideCommand(100L);
+                when(rideRepository.findById(100L)).thenReturn(Optional.of(ride));
+
+                // When & Then
+                IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+                        cancelRideHandler.handle(command, 1L)
+                );
+
+                assertTrue(exception.getMessage().contains("Cannot cancel ride"));
+                assertTrue(exception.getMessage().contains("COMPLETED"));
+                assertTrue(exception.getMessage().contains("Only rides with REQUESTED, INVITED, or ACCEPTED status can be cancelled"));
+                verify(rideRepository, never()).save(any());
+            }
         }
     }
 }
+
