@@ -31,6 +31,7 @@ import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -169,6 +170,110 @@ class RideCommandQueryTest {
             requestRideHandler.handle(blackCommand, 1L);
 
             // Then
+            verify(rideRepository).save(any(RideEntity.class));
+        }
+
+        @Test
+        void givenActiveRequestedRide_whenRequestingNewRide_thenThrowsException() {
+            // Given - Passenger has a REQUESTED ride
+            RideEntity activeRide = new RideEntity();
+            activeRide.setId(50L);
+            activeRide.setStatus(RideStatus.REQUESTED);
+            activeRide.setPassenger(passenger);
+
+            when(rideRepository.findByPassengerIdAndStatusIn(eq(1L), anyList()))
+                    .thenReturn(List.of(activeRide));
+
+            // When & Then
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> requestRideHandler.handle(command, 1L)
+            );
+            assertTrue(exception.getMessage().contains("Cannot request a new ride"));
+            assertTrue(exception.getMessage().contains("ID: 50"));
+            assertTrue(exception.getMessage().contains("Status: REQUESTED"));
+            verify(rideRepository, never()).save(any());
+        }
+
+        @Test
+        void givenActiveAcceptedRide_whenRequestingNewRide_thenThrowsException() {
+            // Given - Passenger has an ACCEPTED ride
+            RideEntity activeRide = new RideEntity();
+            activeRide.setId(51L);
+            activeRide.setStatus(RideStatus.ACCEPTED);
+            activeRide.setPassenger(passenger);
+
+            when(rideRepository.findByPassengerIdAndStatusIn(eq(1L), anyList()))
+                    .thenReturn(List.of(activeRide));
+
+            // When & Then
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> requestRideHandler.handle(command, 1L)
+            );
+            assertTrue(exception.getMessage().contains("Cannot request a new ride"));
+            assertTrue(exception.getMessage().contains("Status: ACCEPTED"));
+        }
+
+        @Test
+        void givenActiveInProgressRide_whenRequestingNewRide_thenThrowsException() {
+            // Given - Passenger has an IN_PROGRESS ride
+            RideEntity activeRide = new RideEntity();
+            activeRide.setId(52L);
+            activeRide.setStatus(RideStatus.IN_PROGRESS);
+            activeRide.setPassenger(passenger);
+
+            when(rideRepository.findByPassengerIdAndStatusIn(eq(1L), anyList()))
+                    .thenReturn(List.of(activeRide));
+
+            // When & Then
+            IllegalArgumentException exception = assertThrows(
+                    IllegalArgumentException.class,
+                    () -> requestRideHandler.handle(command, 1L)
+            );
+            assertTrue(exception.getMessage().contains("Cannot request a new ride"));
+            assertTrue(exception.getMessage().contains("Status: IN_PROGRESS"));
+        }
+
+        @Test
+        void givenCompletedRide_whenRequestingNewRide_thenRideCreated() {
+            // Given - Passenger's last ride was COMPLETED (no active rides)
+            when(rideRepository.findByPassengerIdAndStatusIn(eq(1L), anyList()))
+                    .thenReturn(List.of()); // No active rides
+            when(passengerRepository.findById(1L)).thenReturn(Optional.of(passenger));
+            when(rideRepository.save(any(RideEntity.class))).thenAnswer(invocation -> {
+                RideEntity ride = invocation.getArgument(0);
+                ride.setId(100L);
+                return ride;
+            });
+
+            // When
+            RideRequestResult result = requestRideHandler.handle(command, 1L);
+
+            // Then
+            assertNotNull(result);
+            assertEquals(100L, result.rideId());
+            verify(rideRepository).save(any(RideEntity.class));
+        }
+
+        @Test
+        void givenCancelledRide_whenRequestingNewRide_thenRideCreated() {
+            // Given - Passenger's last ride was CANCELLED (no active rides)
+            when(rideRepository.findByPassengerIdAndStatusIn(eq(1L), anyList()))
+                    .thenReturn(List.of()); // No active rides
+            when(passengerRepository.findById(1L)).thenReturn(Optional.of(passenger));
+            when(rideRepository.save(any(RideEntity.class))).thenAnswer(invocation -> {
+                RideEntity ride = invocation.getArgument(0);
+                ride.setId(100L);
+                return ride;
+            });
+
+            // When
+            RideRequestResult result = requestRideHandler.handle(command, 1L);
+
+            // Then
+            assertNotNull(result);
+            assertEquals(100L, result.rideId());
             verify(rideRepository).save(any(RideEntity.class));
         }
     }

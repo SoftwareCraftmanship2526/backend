@@ -16,4 +16,7 @@ public interface RideRepository extends JpaRepository<RideEntity, Long> {
 
     @Query("SELECT r FROM RideEntity r WHERE r.status = :status AND r.invitedAt < :cutoffTime")
     List<RideEntity> findTimedOutInvitations(@Param("status") RideStatus status, @Param("cutoffTime") LocalDateTime cutoffTime);
+
+    @Query("SELECT r FROM RideEntity r WHERE r.passenger.id = :passengerId AND r.status IN :statuses ORDER BY r.requestedAt DESC")
+    List<RideEntity> findByPassengerIdAndStatusIn(@Param("passengerId") Long passengerId, @Param("statuses") List<RideStatus> statuses);
 }

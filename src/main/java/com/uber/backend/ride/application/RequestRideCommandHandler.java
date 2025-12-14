@@ -15,6 +15,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,19 @@ public class RequestRideCommandHandler {
         // Get ride type from command (already enum)
         RideType rideType = command.rideType();
 
+        // Check if passenger has an active ride (REQUESTED, INVITED, ACCEPTED, or IN_PROGRESS)
+        List<RideEntity> activeRides = rideRepository.findByPassengerIdAndStatusIn(
+            passengerId,
+            List.of(RideStatus.REQUESTED, RideStatus.INVITED, RideStatus.ACCEPTED, RideStatus.IN_PROGRESS)
+        );
+
+        if (!activeRides.isEmpty()) {
+            RideEntity activeRide = activeRides.get(0);
+            throw new IllegalArgumentException(
+                "Cannot request a new ride. You already have an active ride (ID: " + activeRide.getId() + 
+                ", Status: " + activeRide.getStatus() + "). Please complete or cancel your current ride first."
+            );
+        }
 
         // Find passenger
         PassengerEntity passenger = passengerRepository.findById(passengerId)
