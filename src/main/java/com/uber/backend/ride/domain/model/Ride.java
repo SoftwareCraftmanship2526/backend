@@ -1,7 +1,5 @@
 package com.uber.backend.ride.domain.model;
 
-import com.uber.backend.ride.domain.event.RideCancelledEvent;
-import com.uber.backend.shared.domain.DomainEvents;
 import com.uber.backend.shared.domain.valueobject.Location;
 import com.uber.backend.ride.domain.enums.RideStatus;
 import jakarta.validation.Valid;
@@ -11,8 +9,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -49,14 +45,4 @@ public class Ride {
     private Long driverId;
     private Long vehicleId;
     private Long paymentId;
-
-    @Builder.Default
-    private List<Long> ratingIds = new ArrayList<>();
-
-    public void cancelIfUnmatched() {
-        if (status == RideStatus.REQUESTED) {
-            this.status = RideStatus.CANCELLED;
-            DomainEvents.raise(new RideCancelledEvent(id));
-        }
-    }
 }

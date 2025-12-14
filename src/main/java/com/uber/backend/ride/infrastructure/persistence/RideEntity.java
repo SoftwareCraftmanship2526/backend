@@ -4,17 +4,18 @@ import com.uber.backend.passenger.infrastructure.persistence.PassengerEntity;
 import com.uber.backend.driver.infrastructure.persistence.DriverEntity;
 import com.uber.backend.driver.infrastructure.persistence.VehicleEntity;
 import com.uber.backend.payment.infrastructure.persistence.PaymentEntity;
-import com.uber.backend.rating.infrastructure.persistence.RatingEntity;
 import com.uber.backend.shared.domain.valueobject.Location;
 import com.uber.backend.ride.domain.enums.RideStatus;
 import com.uber.backend.ride.domain.enums.RideType;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Entity
 @Table(name = "rides")
 @Getter
@@ -94,10 +95,6 @@ public class RideEntity {
     @OneToOne(mappedBy = "ride", cascade = CascadeType.ALL, orphanRemoval = true)
     private PaymentEntity payment;
 
-    @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL, orphanRemoval = true)
-    @Builder.Default
-    private List<RatingEntity> ratings = new ArrayList<>();
-
     @ElementCollection
     @CollectionTable(name = "ride_denied_drivers", joinColumns = @JoinColumn(name = "ride_id"))
     @Column(name = "driver_id")
@@ -111,6 +108,13 @@ public class RideEntity {
         }
         if (this.status == null) {
             this.status = RideStatus.REQUESTED;
+        }
+    }
+
+    public void cancelIfUnmatched() {
+        if (this.status == RideStatus.REQUESTED) {
+            this.status = RideStatus.CANCELLED;
+            this.cancelledAt = LocalDateTime.now();
         }
     }
 }

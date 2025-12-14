@@ -1,10 +1,7 @@
 package com.uber.backend.ride.infrastructure.persistence;
 
 import com.uber.backend.ride.domain.model.Ride;
-import com.uber.backend.rating.infrastructure.persistence.RatingEntity;
 import org.springframework.stereotype.Component;
-
-import java.util.stream.Collectors;
 
 @Component
 public class RideMapper {
@@ -27,9 +24,6 @@ public class RideMapper {
                 .driverId(entity.getDriver() != null ? entity.getDriver().getId() : null)
                 .vehicleId(entity.getVehicle() != null ? entity.getVehicle().getId() : null)
                 .paymentId(entity.getPayment() != null ? entity.getPayment().getId() : null)
-                .ratingIds(entity.getRatings().stream()
-                        .map(RatingEntity::getId)
-                        .collect(Collectors.toList()))
                 .build();
     }
 

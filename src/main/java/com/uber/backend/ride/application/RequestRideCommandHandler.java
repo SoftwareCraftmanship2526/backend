@@ -11,6 +11,7 @@ import com.uber.backend.ride.infrastructure.repository.RideRepository;
 import com.uber.backend.shared.domain.port.GeocodingPort;
 import com.uber.backend.shared.domain.valueobject.Location;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,6 +23,7 @@ public class RequestRideCommandHandler {
     private final RideRepository rideRepository;
     private final PassengerRepository passengerRepository;
     private final GeocodingPort geocodingPort;
+    private final ApplicationEventPublisher publisher;
 
     public RideRequestResult handle(RequestRideCommand command, Long passengerId) {
 
@@ -71,13 +73,11 @@ public class RequestRideCommandHandler {
         // Save ride entity
         rideEntity = rideRepository.save(rideEntity);
 
+        RideRequestResult result = new RideRequestResult(rideEntity.getId(), passengerId, rideEntity.getStatus(), rideEntity.getRequestedAt());
+        publisher.publishEvent(result);
+
         // Return result (price is null at request time, calculated when ride completes)
-        return new RideRequestResult(
-            rideEntity.getId(),
-            passengerId,
-            rideEntity.getStatus(),
-            rideEntity.getRequestedAt()
-        );
+        return result;
 
 
     }

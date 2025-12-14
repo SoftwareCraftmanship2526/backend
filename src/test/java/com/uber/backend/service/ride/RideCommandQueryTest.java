@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -78,6 +79,10 @@ class RideCommandQueryTest {
 
     @InjectMocks
     private CancelRideCommandHandler cancelRideHandler;
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
+
 
     @Nested
     class RequestRideCommandTests {

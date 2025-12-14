@@ -1,9 +1,10 @@
 package com.uber.backend.ride.infrastructure;
 
 import com.uber.backend.ride.application.CancelRideIfUnmatchedCommandHandler;
-import com.uber.backend.ride.application.RequestRideCommandHandler;
 import com.uber.backend.ride.application.command.CancelRideIfUnmatchedCommand;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CommandBus {
 
     private final CancelRideIfUnmatchedCommandHandler cancelRideIfUnmatchedCommandHandler;

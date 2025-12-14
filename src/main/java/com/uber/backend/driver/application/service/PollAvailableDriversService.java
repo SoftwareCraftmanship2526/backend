@@ -64,11 +64,13 @@ public class PollAvailableDriversService {
 
             if (!distanceFromStart.isEmpty()) {
                 DriverEntity nearest = distanceFromStart.firstEntry().getValue();
-                Double nearestDistance = distanceFromStart.firstEntry().getKey();
                 ride.setStatus(RideStatus.INVITED);
                 ride.setDriver(nearest);
                 ride.setVehicle(nearest.getCurrentVehicle());
                 ride.setInvitedAt(LocalDateTime.now());
+                DriverEntity driver = ride.getDriver();
+                driver.setIsAvailable(false);
+                driverRepository.save(driver);
                 rideRepository.save(ride);
             }
         }

@@ -1,11 +1,15 @@
 package com.uber.backend.ride.infrastructure;
 
 import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
+@Component
+@EnableScheduling
 public class SpringDelayedCommandScheduler implements DelayedCommandScheduler {
 
     private final TaskScheduler taskScheduler;
