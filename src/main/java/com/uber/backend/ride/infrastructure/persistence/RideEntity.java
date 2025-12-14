@@ -112,7 +112,7 @@ public class RideEntity {
     }
 
     public void cancelIfUnmatched() {
-        if (this.status == RideStatus.REQUESTED) {
+        if (this.status == RideStatus.REQUESTED || this.status == RideStatus.DENIED) {
             this.status = RideStatus.CANCELLED;
             this.cancelledAt = LocalDateTime.now();
         }

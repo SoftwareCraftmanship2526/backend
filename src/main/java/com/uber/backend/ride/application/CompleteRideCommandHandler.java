@@ -1,5 +1,7 @@
 package com.uber.backend.ride.application;
 
+import com.uber.backend.driver.infrastructure.persistence.DriverEntity;
+import com.uber.backend.driver.infrastructure.repository.DriverRepository;
 import com.uber.backend.payment.application.CalculateFareQueryHandler;
 import com.uber.backend.payment.application.query.CalculateFareQuery;
 import com.uber.backend.payment.application.query.FareCalculationResult;
@@ -25,6 +27,7 @@ public class CompleteRideCommandHandler {
     private final RideRepository rideRepository;
     private final PaymentRepository paymentRepository;
     private final CalculateFareQueryHandler calculateFareQueryHandler;
+    private final DriverRepository driverRepository;
 
     @Transactional
     public RideResult handle(CompleteRideCommand command, Long driverId) {
@@ -70,6 +73,9 @@ public class CompleteRideCommandHandler {
         // Update ride status
         rideEntity.setStatus(RideStatus.COMPLETED);
         rideEntity = rideRepository.save(rideEntity);
+        DriverEntity driver = rideEntity.getDriver();
+        driver.setIsAvailable(true);
+        driverRepository.save(driver);
         return mapToRideResult(rideEntity);
     }
 
