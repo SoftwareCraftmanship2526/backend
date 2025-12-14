@@ -69,6 +69,9 @@ public class CompleteRideCommandHandler {
                 .build();
 
         paymentRepository.save(payment);
+        
+        // Set bidirectional relationship
+        rideEntity.setPayment(payment);
 
         // Update ride status
         rideEntity.setStatus(RideStatus.COMPLETED);
